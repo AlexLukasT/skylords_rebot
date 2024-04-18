@@ -1,8 +1,9 @@
 use api::*;
-use log::{error, warn};
+use log::*;
 use std::collections::HashMap;
 use std::num::NonZeroU32;
 
+#[derive(Debug)]
 pub struct GameInfo {
     pub state: Option<GameState>,
     pub bot: PlayerInfo,
@@ -25,7 +26,7 @@ impl GameInfo {
         GameInfo {
             state: None,
             bot: PlayerInfo {
-                id: EntityId(NonZeroU32::new(0).unwrap()),
+                id: EntityId(NonZeroU32::new(1).unwrap()),
                 team: 0,
                 power_slots: vec![],
                 token_slots: vec![],
@@ -33,7 +34,7 @@ impl GameInfo {
                 squads: HashMap::new(),
             },
             opponent: PlayerInfo {
-                id: EntityId(NonZeroU32::new(0).unwrap()),
+                id: EntityId(NonZeroU32::new(1).unwrap()),
                 team: 0,
                 power_slots: vec![],
                 token_slots: vec![],
@@ -44,7 +45,7 @@ impl GameInfo {
         }
     }
 
-    pub fn init(&mut self, start_state: &GameStartState) {
+    pub fn init(&mut self, start_state: GameStartState) {
         self.bot.id = start_state.your_player_id;
 
         // find the bot's team
@@ -91,25 +92,29 @@ impl GameInfo {
         }
 
         // find power slots for each player
-        for power_slot in &start_state.entities.power_slots {
-            if power_slot.entity.id == self.bot.id {
-                self.bot.power_slots.push(power_slot.clone());
-            } else if power_slot.entity.id == self.opponent.id {
-                self.opponent.power_slots.push(power_slot.clone());
+        for power_slot in start_state.entities.power_slots {
+            if let Some(power_slot_player_id) = power_slot.entity.player_entity_id {
+                if power_slot_player_id == self.bot.id {
+                    self.bot.power_slots.push(power_slot);
+                } else if power_slot_player_id == self.opponent.id {
+                    self.opponent.power_slots.push(power_slot);
+                }
             }
         }
 
         // find token slots for each player
-        for token_slot in &start_state.entities.token_slots {
-            if token_slot.entity.id == self.bot.id {
-                self.bot.token_slots.push(token_slot.clone());
-            } else if token_slot.entity.id == self.opponent.id {
-                self.opponent.token_slots.push(token_slot.clone());
+        for token_slot in start_state.entities.token_slots {
+            if let Some(token_slot_player_id) = token_slot.entity.player_entity_id {
+                if token_slot_player_id == self.bot.id {
+                    self.bot.token_slots.push(token_slot);
+                } else if token_slot_player_id == self.opponent.id {
+                    self.opponent.token_slots.push(token_slot);
+                }
             }
         }
     }
 
-    pub fn parse_state(&mut self, state: &GameState) {
+    pub fn parse_state(&mut self, state: GameState) {
         self.current_tick = Some(state.current_tick);
 
         // set power for each player
@@ -122,13 +127,15 @@ impl GameInfo {
         }
 
         // assign units
-        for squad in &state.entities.squads {
-            if squad.entity.id == self.bot.id
-                && self.bot.squads.contains_key(&squad.entity.id.0.to_string())
-            {
-                self.bot
-                    .squads
-                    .insert(squad.entity.id.0.to_string(), squad.clone());
+        for squad in state.entities.squads {
+            if let Some(squad_player_id) = squad.entity.player_entity_id {
+                if squad_player_id == self.bot.id
+                    && self.bot.squads.contains_key(&squad.entity.id.0.to_string())
+                {
+                    self.bot.squads.insert(squad.entity.id.0.to_string(), squad);
+                }
+            } else {
+                warn!("Found squad {:?} not belonging to any player", squad);
             }
         }
     }

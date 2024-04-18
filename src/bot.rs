@@ -2,7 +2,7 @@ use crate::game_info::GameInfo;
 use api::sr_libs::utils::card_templates::CardTemplate::*;
 use api::Upgrade::U3;
 use api::*;
-use log::{info, warn};
+use log::{debug, info, warn};
 use sr_libs::utils::card_templates::CardTemplate;
 use std::borrow::Cow;
 
@@ -41,11 +41,12 @@ impl warp_wrapper::BotImpl for SkylordsRebot {
 }
 
 fn match_start(bot_state: &mut SkylordsRebot, state: GameStartState) {
-    bot_state.game_info.init(&state);
+    bot_state.game_info.init(state);
+    debug!("Initialized Game Info: {:?}", bot_state.game_info);
 }
 
 fn on_tick(bot_state: &mut SkylordsRebot, state: GameState) -> Vec<Command> {
-    bot_state.game_info.parse_state(&state);
+    bot_state.game_info.parse_state(state);
     vec![]
 }
 

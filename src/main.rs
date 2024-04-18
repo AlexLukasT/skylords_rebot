@@ -1,4 +1,5 @@
 use clap::Parser;
+use env_logger::Builder;
 use log::{info, LevelFilter};
 
 use api::*;
@@ -10,7 +11,7 @@ mod game_info;
 struct Args {
     #[arg(short, long, default_value_t = 7273)]
     port: u16,
-    #[arg(short, long, value_enum, default_value = "example")]
+    #[arg(short, long, value_enum, default_value = "skylords-rebot")]
     implementation: BotImplementations,
 }
 
@@ -22,7 +23,11 @@ enum BotImplementations {
 
 #[tokio::main]
 async fn main() {
-    env_logger::builder().filter_level(LevelFilter::Info).init();
+    let mut builder = Builder::new();
+    // set logging for hyper::proto module to info so it doesn't clutter the debug log
+    builder.filter_module("hyper::proto", LevelFilter::Info);
+    builder.filter_level(LevelFilter::Debug);
+    builder.init();
 
     let args = Args::parse();
 
