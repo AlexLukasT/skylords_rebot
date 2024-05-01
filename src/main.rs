@@ -5,7 +5,10 @@ use log::{info, LevelFilter};
 use api::*;
 
 mod bot;
+mod controller;
 mod game_info;
+mod location;
+mod utils;
 
 #[derive(Parser)]
 struct Args {

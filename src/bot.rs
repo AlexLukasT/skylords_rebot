@@ -3,8 +3,11 @@ use api::sr_libs::utils::card_templates::CardTemplate::*;
 use api::Upgrade::U3;
 use api::*;
 use log::{debug, info, warn};
-use sr_libs::utils::card_templates::CardTemplate;
 use std::borrow::Cow;
+
+use crate::controller::squad_controller::SquadController;
+use crate::controller::Controller;
+use crate::location::Location;
 
 // /AI: add SkylordsRebot Tutorial 4
 const NAME: &'static str = "SkylordsRebot";
@@ -12,6 +15,7 @@ const NAME: &'static str = "SkylordsRebot";
 pub struct SkylordsRebot {
     deck: &'static Deck,
     game_info: GameInfo,
+    controllers: Vec<SquadController>,
 }
 
 impl warp_wrapper::BotImpl for SkylordsRebot {
@@ -28,6 +32,7 @@ impl warp_wrapper::BotImpl for SkylordsRebot {
         SkylordsRebot {
             deck,
             game_info: GameInfo::new(),
+            controllers: vec![],
         }
     }
 
@@ -42,15 +47,31 @@ impl warp_wrapper::BotImpl for SkylordsRebot {
 
 fn match_start(bot_state: &mut SkylordsRebot, state: GameStartState) {
     bot_state.game_info.init(state);
-    debug!("Initialized Game Info: {:?}", bot_state.game_info);
+    let mut init_squad = SquadController::new("Dreadcharger1".to_string());
+    init_squad.spawn(
+        Dreadcharger,
+        Location::BotStartToken.to_pos2d(&bot_state.game_info),
+    );
+    bot_state.controllers.push(init_squad);
 }
 
 fn on_tick(bot_state: &mut SkylordsRebot, state: GameState) -> Vec<Command> {
     bot_state.game_info.parse_state(state);
-    vec![]
+
+    let mut commands: Vec<Command> = vec![];
+
+    for controller in bot_state.controllers.iter_mut() {
+        controller.move_squad(
+            &bot_state.game_info,
+            Location::CenterToken.to_pos2d(&bot_state.game_info),
+        );
+        commands.extend(controller.tick(&bot_state.game_info));
+    }
+
+    commands
 }
 
-const BOT_DECK: Deck = Deck {
+pub const BOT_DECK: Deck = Deck {
     name: Cow::Borrowed("ShadowNature"),
     cover_card_index: 0,
     cards: [
@@ -76,19 +97,3 @@ const BOT_DECK: Deck = Deck {
         CardId::new(AshbonePyro, U3),
     ],
 };
-
-trait CardPosition {
-    fn card_pos(&self, card: CardTemplate) -> u8;
-}
-
-impl CardPosition for Deck {
-    fn card_pos(&self, card: CardTemplate) -> u8 {
-        let card_id = CardId::new(card, U3);
-        if let Some(pos) = self.cards.iter().position(|&c_id| c_id == card_id) {
-            pos as u8
-        } else {
-            warn!("Unable to find deck position for card {:?}", card_id);
-            0
-        }
-    }
-}

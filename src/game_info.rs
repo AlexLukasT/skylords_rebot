@@ -18,7 +18,9 @@ pub struct PlayerInfo {
     pub power_slots: Vec<PowerSlot>,
     pub token_slots: Vec<TokenSlot>,
     pub power: f32,
-    pub squads: HashMap<String, Squad>,
+    pub squads: HashMap<EntityId, Squad>,
+    // Squads that were just spawned
+    pub new_squad_ids: Vec<EntityId>,
 }
 
 impl GameInfo {
@@ -32,6 +34,7 @@ impl GameInfo {
                 token_slots: vec![],
                 power: 0.,
                 squads: HashMap::new(),
+                new_squad_ids: vec![],
             },
             opponent: PlayerInfo {
                 id: EntityId(NonZeroU32::new(1).unwrap()),
@@ -40,6 +43,7 @@ impl GameInfo {
                 token_slots: vec![],
                 power: 0.,
                 squads: HashMap::new(),
+                new_squad_ids: vec![],
             },
             current_tick: None,
         }
@@ -116,6 +120,11 @@ impl GameInfo {
 
     pub fn parse_state(&mut self, state: GameState) {
         self.current_tick = Some(state.current_tick);
+        debug!("{:?}", self.current_tick.unwrap());
+
+        // clear new squads as they are not new this tick anymore
+        self.bot.new_squad_ids.clear();
+        self.opponent.new_squad_ids.clear();
 
         // set power for each player
         for player in &state.players {
@@ -128,15 +137,26 @@ impl GameInfo {
 
         // assign units
         for squad in state.entities.squads {
+            let squad_entity_id = squad.entity.id;
             if let Some(squad_player_id) = squad.entity.player_entity_id {
-                if squad_player_id == self.bot.id
-                    && self.bot.squads.contains_key(&squad.entity.id.0.to_string())
-                {
-                    self.bot.squads.insert(squad.entity.id.0.to_string(), squad);
+                if squad_player_id == self.bot.id {
+                    if let None = self.bot.squads.insert(squad.entity.id, squad) {
+                        // the squad did not exist before
+                        debug!("New squad {:?} was spawned for bot", squad_entity_id);
+                        self.bot.new_squad_ids.push(squad_entity_id);
+                    }
+                } else if squad_player_id == self.opponent.id {
+                    if let None = self.bot.squads.insert(squad.entity.id, squad) {
+                        // the squad did not exist before
+                        debug!("New squad {:?} was spawned for opponent", squad_entity_id);
+                        self.bot.new_squad_ids.push(squad_entity_id);
+                    }
                 }
             } else {
                 warn!("Found squad {:?} not belonging to any player", squad);
             }
         }
+
+        // TODO: handle killed units
     }
 }
