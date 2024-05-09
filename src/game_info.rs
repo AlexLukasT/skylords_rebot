@@ -18,9 +18,10 @@ pub struct PlayerInfo {
     pub power_slots: Vec<PowerSlot>,
     pub token_slots: Vec<TokenSlot>,
     pub power: f32,
+    pub void_power: f32,
+    pub tempo: f32, // Power + Bound Power - Void Power
     pub squads: HashMap<EntityId, Squad>,
-    // Squads that were just spawned
-    pub new_squad_ids: Vec<EntityId>,
+    pub new_squad_ids: Vec<EntityId>, // Squads that were just spawned
 }
 
 impl GameInfo {
@@ -33,6 +34,8 @@ impl GameInfo {
                 power_slots: vec![],
                 token_slots: vec![],
                 power: 0.,
+                void_power: 0.,
+                tempo: 0.,
                 squads: HashMap::new(),
                 new_squad_ids: vec![],
             },
@@ -42,6 +45,8 @@ impl GameInfo {
                 power_slots: vec![],
                 token_slots: vec![],
                 power: 0.,
+                void_power: 0.,
+                tempo: 0.,
                 squads: HashMap::new(),
                 new_squad_ids: vec![],
             },
@@ -130,8 +135,10 @@ impl GameInfo {
         for player in &state.players {
             if player.id == self.bot.id {
                 self.bot.power = player.power;
+                self.bot.void_power = player.void_power;
             } else if player.id == self.opponent.id {
                 self.opponent.power = player.power;
+                self.opponent.void_power = player.void_power;
             }
         }
 
@@ -157,6 +164,20 @@ impl GameInfo {
             }
         }
 
+        // calculate and set tempo for each player
+        self.bot.tempo = get_tempo(&self.bot);
+        self.opponent.tempo = get_tempo(&self.opponent);
+
         // TODO: handle killed units
     }
+}
+
+fn get_tempo(player: &PlayerInfo) -> f32 {
+    // Artificial quantity "Tempo" = Free Power + Bound Power - Void Power.
+    // Primarily used to compare for each player on who currently has the tempo lead.
+    let mut bound_power: f32 = 0.;
+    for squad in player.squads.values() {
+        bound_power += squad.bound_power;
+    }
+    player.power + bound_power - player.void_power
 }

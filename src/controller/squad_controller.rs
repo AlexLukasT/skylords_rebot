@@ -20,6 +20,7 @@ pub struct SquadController {
     commands: Vec<Command>,
     current_destination: Option<Position2D>,
     name: String,
+    current_target: Option<EntityId>,
 }
 
 #[derive(Debug, Default, PartialEq)]
@@ -30,7 +31,6 @@ enum SquadControllerState {
     SpawnCommandSent,
     Moving,
     Attacking,
-    Defending,
 }
 
 impl SquadController {
@@ -41,6 +41,7 @@ impl SquadController {
             commands: vec![],
             current_destination: None,
             name,
+            current_target: None,
         }
     }
 
@@ -73,9 +74,8 @@ impl SquadController {
             new_destination_provided = true;
         }
 
-        if (self.state == SquadControllerState::Idling
-            || self.state == SquadControllerState::Moving)
-            && new_destination_provided
+        if self.state == SquadControllerState::Idling
+            || (self.state == SquadControllerState::Moving && new_destination_provided)
         {
             self.commands.push(Command::GroupGoto {
                 squads: vec![self.entity_id],
@@ -88,6 +88,37 @@ impl SquadController {
             debug!(
                 "{:?} ({:?})) moving towards {:?}",
                 self.name, self.entity_id, self.current_destination
+            );
+        }
+    }
+
+    pub fn attack(&mut self, target: &EntityId) {
+        let new_target_provided: bool;
+        if let Some(cur_target) = self.current_target {
+            if *target == cur_target {
+                new_target_provided = false;
+            } else {
+                new_target_provided = true;
+            }
+        } else {
+            // no current target set
+            new_target_provided = true;
+        }
+
+        if self.state == SquadControllerState::Idling
+            || self.state == SquadControllerState::Moving
+            || (self.state == SquadControllerState::Attacking && new_target_provided)
+        {
+            self.commands.push(Command::GroupAttack {
+                squads: vec![self.entity_id],
+                target_entity_id: *target,
+                force_attack: false,
+            });
+            self.current_target = Some(*target);
+            self.enter_state(SquadControllerState::Attacking);
+            debug!(
+                "{:?} ({:?})) attacking {:?}",
+                self.name, self.entity_id, self.current_target
             );
         }
     }

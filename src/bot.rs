@@ -2,12 +2,12 @@ use crate::game_info::GameInfo;
 use api::sr_libs::utils::card_templates::CardTemplate::*;
 use api::Upgrade::U3;
 use api::*;
+use bonsai_bt::{Timer, BT};
 use log::{debug, info, warn};
 use std::borrow::Cow;
 
-use crate::controller::squad_controller::SquadController;
-use crate::controller::Controller;
-use crate::location::Location;
+use crate::command_scheduler::CommandScheduler;
+use crate::macro_behavior;
 
 // /AI: add SkylordsRebot Tutorial 4
 const NAME: &'static str = "SkylordsRebot";
@@ -15,7 +15,10 @@ const NAME: &'static str = "SkylordsRebot";
 pub struct SkylordsRebot {
     deck: &'static Deck,
     game_info: GameInfo,
-    controllers: Vec<SquadController>,
+    bt: BT<macro_behavior::MacroAction, macro_behavior::BlackBoardData>,
+    timer: Timer,
+    macro_state: macro_behavior::MacroState,
+    command_scheduler: CommandScheduler,
 }
 
 impl warp_wrapper::BotImpl for SkylordsRebot {
@@ -29,10 +32,18 @@ impl warp_wrapper::BotImpl for SkylordsRebot {
 
     fn prepare_for_battle(map_info: &MapInfo, deck: &'static Deck) -> Self {
         info!("Preparing for: {:?}?", map_info.map);
+        let bt = macro_behavior::create_behavior_tree();
+        let timer = Timer::init_time();
         SkylordsRebot {
             deck,
             game_info: GameInfo::new(),
-            controllers: vec![],
+            // controllers: vec![],
+            bt,
+            timer,
+            macro_state: macro_behavior::MacroState {
+                squad_controllers: vec![],
+            },
+            command_scheduler: CommandScheduler::new(),
         }
     }
 
@@ -47,28 +58,32 @@ impl warp_wrapper::BotImpl for SkylordsRebot {
 
 fn match_start(bot_state: &mut SkylordsRebot, state: GameStartState) {
     bot_state.game_info.init(state);
-    let mut init_squad = SquadController::new("Dreadcharger1".to_string());
-    init_squad.spawn(
-        Dreadcharger,
-        Location::BotStartToken.to_pos2d(&bot_state.game_info),
-    );
-    bot_state.controllers.push(init_squad);
 }
 
 fn on_tick(bot_state: &mut SkylordsRebot, state: GameState) -> Vec<Command> {
+    if state.rejected_commands.len() > 0 {
+        warn!("Rejected commands: {:?}", state.rejected_commands);
+    }
     bot_state.game_info.parse_state(state);
+    bot_state
+        .command_scheduler
+        .update_state(&bot_state.game_info);
 
-    let mut commands: Vec<Command> = vec![];
+    macro_behavior::tick(
+        &mut bot_state.bt,
+        &bot_state.game_info,
+        &mut bot_state.timer,
+        &mut bot_state.macro_state,
+        &mut bot_state.command_scheduler,
+    );
 
-    for controller in bot_state.controllers.iter_mut() {
-        controller.move_squad(
-            &bot_state.game_info,
-            Location::CenterToken.to_pos2d(&bot_state.game_info),
-        );
-        commands.extend(controller.tick(&bot_state.game_info));
+    let scheduled_commands = bot_state.command_scheduler.get_scheduled_commands();
+
+    if scheduled_commands.len() > 0 {
+        debug!("Sending commands: {:?}", scheduled_commands);
     }
 
-    commands
+    scheduled_commands
 }
 
 pub const BOT_DECK: Deck = Deck {
