@@ -1,4 +1,5 @@
 use api::sr_libs::utils::card_templates::CardTemplate::*;
+use api::*;
 use bonsai_bt::{Action, Behavior::*, Event, Status, Timer, UpdateArgs, BT};
 use log::*;
 
@@ -43,7 +44,6 @@ pub fn tick(
                 (Status::Success, args.dt)
             }
             MacroAction::AttackCenter => {
-                info!("Attacking center");
                 state.attack_center(game_info, command_scheduler);
                 (Status::Running, args.dt) 
             }
@@ -83,7 +83,7 @@ impl MacroState {
         }
 
         // find the power slot closes to the center of the map
-        let mut targets = game_info.opponent.power_slots.clone();
+        let mut targets: Vec<&PowerSlot> = game_info.opponent.power_slots.values().collect();
 
         let center_pos = Location::CenterToken.to_pos2d(&game_info);
         targets.sort_by(|a, b| {

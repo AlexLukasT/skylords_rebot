@@ -15,13 +15,14 @@ pub struct GameInfo {
 pub struct PlayerInfo {
     pub id: EntityId,
     pub team: u8,
-    pub power_slots: Vec<PowerSlot>,
-    pub token_slots: Vec<TokenSlot>,
+    pub power_slots: HashMap<EntityId, PowerSlot>,
+    pub token_slots: HashMap<EntityId, TokenSlot>,
     pub power: f32,
     pub void_power: f32,
     pub tempo: f32, // Power + Bound Power - Void Power
     pub squads: HashMap<EntityId, Squad>,
     pub new_squad_ids: Vec<EntityId>, // Squads that were just spawned
+    pub start_token: Option<EntityId>,
 }
 
 impl GameInfo {
@@ -31,24 +32,26 @@ impl GameInfo {
             bot: PlayerInfo {
                 id: EntityId(NonZeroU32::new(1).unwrap()),
                 team: 0,
-                power_slots: vec![],
-                token_slots: vec![],
+                power_slots: HashMap::new(),
+                token_slots: HashMap::new(),
                 power: 0.,
                 void_power: 0.,
                 tempo: 0.,
                 squads: HashMap::new(),
                 new_squad_ids: vec![],
+                start_token: None,
             },
             opponent: PlayerInfo {
                 id: EntityId(NonZeroU32::new(1).unwrap()),
                 team: 0,
-                power_slots: vec![],
-                token_slots: vec![],
+                power_slots: HashMap::new(),
+                token_slots: HashMap::new(),
                 power: 0.,
                 void_power: 0.,
                 tempo: 0.,
                 squads: HashMap::new(),
                 new_squad_ids: vec![],
+                start_token: None,
             },
             current_tick: None,
         }
@@ -102,22 +105,26 @@ impl GameInfo {
 
         // find power slots for each player
         for power_slot in start_state.entities.power_slots {
+            let slot_id = power_slot.entity.id;
             if let Some(power_slot_player_id) = power_slot.entity.player_entity_id {
                 if power_slot_player_id == self.bot.id {
-                    self.bot.power_slots.push(power_slot);
+                    self.bot.power_slots.insert(slot_id, power_slot);
                 } else if power_slot_player_id == self.opponent.id {
-                    self.opponent.power_slots.push(power_slot);
+                    self.opponent.power_slots.insert(slot_id, power_slot);
                 }
             }
         }
 
         // find token slots for each player
         for token_slot in start_state.entities.token_slots {
+            let slot_id = token_slot.entity.id;
             if let Some(token_slot_player_id) = token_slot.entity.player_entity_id {
                 if token_slot_player_id == self.bot.id {
-                    self.bot.token_slots.push(token_slot);
+                    self.bot.token_slots.insert(slot_id, token_slot);
+                    self.bot.start_token = Some(slot_id);
                 } else if token_slot_player_id == self.opponent.id {
-                    self.opponent.token_slots.push(token_slot);
+                    self.opponent.token_slots.insert(slot_id, token_slot);
+                    self.opponent.start_token = Some(slot_id);
                 }
             }
         }
@@ -147,20 +154,52 @@ impl GameInfo {
             let squad_entity_id = squad.entity.id;
             if let Some(squad_player_id) = squad.entity.player_entity_id {
                 if squad_player_id == self.bot.id {
-                    if let None = self.bot.squads.insert(squad.entity.id, squad) {
+                    if let None = self.bot.squads.insert(squad_entity_id, squad) {
                         // the squad did not exist before
                         debug!("New squad {:?} was spawned for bot", squad_entity_id);
                         self.bot.new_squad_ids.push(squad_entity_id);
                     }
                 } else if squad_player_id == self.opponent.id {
-                    if let None = self.bot.squads.insert(squad.entity.id, squad) {
+                    if let None = self.opponent.squads.insert(squad_entity_id, squad) {
                         // the squad did not exist before
                         debug!("New squad {:?} was spawned for opponent", squad_entity_id);
-                        self.bot.new_squad_ids.push(squad_entity_id);
+                        self.opponent.new_squad_ids.push(squad_entity_id);
                     }
                 }
             } else {
                 warn!("Found squad {:?} not belonging to any player", squad);
+            }
+        }
+
+        // asign power slots
+        for power_slot in state.entities.power_slots {
+            let slot_id = power_slot.entity.id;
+            if let Some(player_id) = power_slot.entity.player_entity_id {
+                if player_id == self.bot.id {
+                    if let None = self.bot.power_slots.insert(slot_id, power_slot) {
+                        debug!("New power slot {:?} created for bot", slot_id);
+                    }
+                } else if player_id == self.opponent.id {
+                    if let None = self.opponent.power_slots.insert(slot_id, power_slot) {
+                        debug!("New power slot {:?} created for opponent", slot_id);
+                    }
+                }
+            }
+        }
+
+        // assign token slots
+        for token_slot in state.entities.token_slots {
+            let slot_id = token_slot.entity.id;
+            if let Some(player_id) = token_slot.entity.player_entity_id {
+                if player_id == self.bot.id {
+                    if let None = self.bot.token_slots.insert(slot_id, token_slot) {
+                        debug!("New token slot {:?} created for bot", slot_id);
+                    }
+                } else if player_id == self.opponent.id {
+                    if let None = self.opponent.token_slots.insert(slot_id, token_slot) {
+                        debug!("New token slot {:?} created for opponent", slot_id);
+                    }
+                }
             }
         }
 

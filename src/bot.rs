@@ -112,3 +112,8 @@ pub const BOT_DECK: Deck = Deck {
         CardId::new(AshbonePyro, U3),
     ],
 };
+
+pub const DECK_POWER_COSTS: [f32; 20] = [
+    60., 50., 50., 25., 50., 70., 45., 50., 80., 55., 40., 100., 50., 60., 60., 60., 70., 100.,
+    60., 100.,
+];
