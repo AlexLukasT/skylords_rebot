@@ -1,7 +1,7 @@
+use api::sr_libs::utils::card_templates::CardTemplate;
 use api::Upgrade::U3;
 use api::*;
 use log::*;
-use sr_libs::utils::card_templates::CardTemplate;
 use std::num::NonZeroU32;
 
 use crate::game_info::GameInfo;
