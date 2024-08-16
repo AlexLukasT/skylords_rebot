@@ -1,0 +1,3866 @@
+{
+    "your_player_id": 2655,
+    "players": [
+        {
+            "name": "Mirosius",
+            "deck": {
+                "name": "Tutorial",
+                "cover_card_index": 0,
+                "cards": [
+                    288,
+                    253,
+                    354,
+                    700,
+                    673,
+                    379,
+                    287,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            },
+            "entity": {
+                "id": 2654,
+                "effects": [],
+                "aspects": [
+                    {
+                        "NPCTag": {}
+                    }
+                ],
+                "team": 4,
+                "power": 100.0,
+                "void_power": 0.0,
+                "population_count": 0,
+                "name": "Mirosius",
+                "orbs": {
+                    "shadow": 0,
+                    "nature": 0,
+                    "frost": 0,
+                    "fire": 0,
+                    "starting": 1,
+                    "white": 0,
+                    "all": 0
+                }
+            }
+        },
+        {
+            "name": "[AI]SkylordsRebot",
+            "deck": {
+                "name": "ShadowNature",
+                "cover_card_index": 0,
+                "cards": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            },
+            "entity": {
+                "id": 2655,
+                "effects": [],
+                "aspects": [
+                    {
+                        "NPCTag": {}
+                    }
+                ],
+                "team": 5,
+                "power": 100.0,
+                "void_power": 0.0,
+                "population_count": 0,
+                "name": "[AI]SkylordsRebot",
+                "orbs": {
+                    "shadow": 0,
+                    "nature": 0,
+                    "frost": 0,
+                    "fire": 0,
+                    "starting": 1,
+                    "white": 0,
+                    "all": 0
+                }
+            }
+        }
+    ],
+    "entities": {
+        "projectiles": [],
+        "power_slots": [
+            {
+                "entity": {
+                    "id": 2623,
+                    "effects": [
+                        {
+                            "id": 2000571,
+                            "line": 29,
+                            "source": 2623,
+                            "source_team": 5,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        },
+                        {
+                            "id": 2001005,
+                            "line": 186,
+                            "source": 2623,
+                            "source_team": 5,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        }
+                    ],
+                    "aspects": [
+                        {
+                            "PowerProduction": {
+                                "current_power": 600.0,
+                                "power_capacity": 600.0
+                            }
+                        },
+                        {
+                            "Hate": {}
+                        },
+                        {
+                            "Health": {
+                                "current_hp": 2000.0,
+                                "cap_current_max": 2000.0
+                            }
+                        },
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "Attackable": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 169.35567,
+                        "y": 55.069653,
+                        "z": 37.71217
+                    },
+                    "player_entity_id": 2655
+                },
+                "res_id": 3,
+                "state": 3,
+                "team": 5
+            },
+            {
+                "entity": {
+                    "id": 2624,
+                    "effects": [
+                        {
+                            "id": 2000571,
+                            "line": 29,
+                            "source": 2624,
+                            "source_team": 5,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        },
+                        {
+                            "id": 2001005,
+                            "line": 186,
+                            "source": 2624,
+                            "source_team": 5,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        }
+                    ],
+                    "aspects": [
+                        {
+                            "PowerProduction": {
+                                "current_power": 600.0,
+                                "power_capacity": 600.0
+                            }
+                        },
+                        {
+                            "Hate": {}
+                        },
+                        {
+                            "Health": {
+                                "current_hp": 2000.0,
+                                "cap_current_max": 2000.0
+                            }
+                        },
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "Attackable": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 185.02084,
+                        "y": 55.089104,
+                        "z": 37.60539
+                    },
+                    "player_entity_id": 2655
+                },
+                "res_id": 3,
+                "state": 3,
+                "team": 5
+            },
+            {
+                "entity": {
+                    "id": 2625,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 114.183,
+                        "y": 54.88189,
+                        "z": 98.97056
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2626,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 120.78301,
+                        "y": 55.0,
+                        "z": 98.97056
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2627,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 182.99454,
+                        "y": 55.0,
+                        "z": 117.625984
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2628,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 170.42061,
+                        "y": 55.0,
+                        "z": 117.62589
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2629,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 172.74492,
+                        "y": 50.005337,
+                        "z": 169.98474
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2630,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 180.30853,
+                        "y": 50.010445,
+                        "z": 185.29858
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2631,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 184.6759,
+                        "y": 50.00533,
+                        "z": 181.14935
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2632,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 168.40605,
+                        "y": 50.017162,
+                        "z": 174.49603
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2633,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 169.4,
+                        "y": 55.0,
+                        "z": 237.1595
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2634,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 183.4,
+                        "y": 55.0,
+                        "z": 237.1595
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2635,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 233.54659,
+                        "y": 55.0,
+                        "z": 254.29355
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2636,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 239.8502,
+                        "y": 55.0,
+                        "z": 254.33868
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2637,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 69.05,
+                        "y": 48.0,
+                        "z": 181.31488
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2638,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 75.434,
+                        "y": 48.0,
+                        "z": 181.315
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2639,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 296.37576,
+                        "y": 48.0,
+                        "z": 176.02464
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2640,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 289.29202,
+                        "y": 48.0,
+                        "z": 176.02464
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2641,
+                    "effects": [
+                        {
+                            "id": 2000571,
+                            "line": 29,
+                            "source": 2641,
+                            "source_team": 4,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        },
+                        {
+                            "id": 2001005,
+                            "line": 186,
+                            "source": 2641,
+                            "source_team": 4,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        }
+                    ],
+                    "aspects": [
+                        {
+                            "PowerProduction": {
+                                "current_power": 600.0,
+                                "power_capacity": 600.0
+                            }
+                        },
+                        {
+                            "Hate": {}
+                        },
+                        {
+                            "Health": {
+                                "current_hp": 2000.0,
+                                "cap_current_max": 2000.0
+                            }
+                        },
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "Attackable": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 169.4518,
+                        "y": 55.064102,
+                        "z": 317.31332
+                    },
+                    "player_entity_id": 2654
+                },
+                "res_id": 3,
+                "state": 3,
+                "team": 4
+            },
+            {
+                "entity": {
+                    "id": 2642,
+                    "effects": [
+                        {
+                            "id": 2000571,
+                            "line": 29,
+                            "source": 2642,
+                            "source_team": 4,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        },
+                        {
+                            "id": 2001005,
+                            "line": 186,
+                            "source": 2642,
+                            "source_team": 4,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        }
+                    ],
+                    "aspects": [
+                        {
+                            "PowerProduction": {
+                                "current_power": 600.0,
+                                "power_capacity": 600.0
+                            }
+                        },
+                        {
+                            "Hate": {}
+                        },
+                        {
+                            "Health": {
+                                "current_hp": 2000.0,
+                                "cap_current_max": 2000.0
+                            }
+                        },
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "Attackable": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 183.4518,
+                        "y": 55.05908,
+                        "z": 317.31332
+                    },
+                    "player_entity_id": 2654
+                },
+                "res_id": 3,
+                "state": 3,
+                "team": 4
+            },
+            {
+                "entity": {
+                    "id": 2643,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 106.23168,
+                        "y": 54.036194,
+                        "z": 267.45325
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            },
+            {
+                "entity": {
+                    "id": 2644,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 245.30684,
+                        "y": 54.92052,
+                        "z": 87.248436
+                    },
+                    "player_entity_id": null
+                },
+                "res_id": 3,
+                "state": 1,
+                "team": 255
+            }
+        ],
+        "token_slots": [
+            {
+                "entity": {
+                    "id": 2645,
+                    "effects": [
+                        {
+                            "id": 2000571,
+                            "line": 29,
+                            "source": 2645,
+                            "source_team": 5,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        },
+                        {
+                            "id": 2001005,
+                            "line": 186,
+                            "source": 2645,
+                            "source_team": 5,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        }
+                    ],
+                    "aspects": [
+                        {
+                            "Hate": {}
+                        },
+                        {
+                            "Health": {
+                                "current_hp": 3000.0,
+                                "cap_current_max": 3000.0
+                            }
+                        },
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "Attackable": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 177.34,
+                        "y": 55.016335,
+                        "z": 37.702557
+                    },
+                    "player_entity_id": 2655
+                },
+                "color": 5
+            },
+            {
+                "entity": {
+                    "id": 2646,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 238.3221,
+                        "y": 55.0,
+                        "z": 93.76264
+                    },
+                    "player_entity_id": null
+                },
+                "color": 0
+            },
+            {
+                "entity": {
+                    "id": 2647,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 176.4,
+                        "y": 50.005295,
+                        "z": 177.8
+                    },
+                    "player_entity_id": null
+                },
+                "color": 0
+            },
+            {
+                "entity": {
+                    "id": 2648,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 176.67712,
+                        "y": 55.0,
+                        "z": 116.7765
+                    },
+                    "player_entity_id": null
+                },
+                "color": 0
+            },
+            {
+                "entity": {
+                    "id": 2649,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 176.4,
+                        "y": 55.0,
+                        "z": 238.6631
+                    },
+                    "player_entity_id": null
+                },
+                "color": 0
+            },
+            {
+                "entity": {
+                    "id": 2650,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 113.50901,
+                        "y": 55.0,
+                        "z": 261.2001
+                    },
+                    "player_entity_id": null
+                },
+                "color": 0
+            },
+            {
+                "entity": {
+                    "id": 2651,
+                    "effects": [
+                        {
+                            "id": 2000571,
+                            "line": 29,
+                            "source": 2651,
+                            "source_team": 4,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        },
+                        {
+                            "id": 2001005,
+                            "line": 186,
+                            "source": 2651,
+                            "source_team": 4,
+                            "start_tick": null,
+                            "end_tick": null,
+                            "specific": {
+                                "Other": {}
+                            }
+                        }
+                    ],
+                    "aspects": [
+                        {
+                            "Hate": {}
+                        },
+                        {
+                            "Health": {
+                                "current_hp": 3000.0,
+                                "cap_current_max": 3000.0
+                            }
+                        },
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "Attackable": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 176.4518,
+                        "y": 55.035976,
+                        "z": 317.31332
+                    },
+                    "player_entity_id": 2654
+                },
+                "color": 5
+            },
+            {
+                "entity": {
+                    "id": 2652,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 72.055,
+                        "y": 48.0,
+                        "z": 176.0
+                    },
+                    "player_entity_id": null
+                },
+                "color": 0
+            },
+            {
+                "entity": {
+                    "id": 2653,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "CollisionBase": {}
+                        },
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 292.79623,
+                        "y": 48.0,
+                        "z": 181.02464
+                    },
+                    "player_entity_id": null
+                },
+                "color": 0
+            }
+        ],
+        "ability_world_objects": [],
+        "squads": [],
+        "figures": [],
+        "buildings": [],
+        "barrier_sets": [
+            {
+                "entity": {
+                    "id": 2505,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "NoJob": {}
+                    },
+                    "position": {
+                        "x": 71.73569,
+                        "y": 48.0,
+                        "z": 179.60944
+                    },
+                    "player_entity_id": null
+                }
+            },
+            {
+                "entity": {
+                    "id": 2506,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "NoJob": {}
+                    },
+                    "position": {
+                        "x": 292.91034,
+                        "y": 48.0,
+                        "z": 178.43207
+                    },
+                    "player_entity_id": null
+                }
+            },
+            {
+                "entity": {
+                    "id": 2507,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "NoJob": {}
+                    },
+                    "position": {
+                        "x": 176.512,
+                        "y": 55.0,
+                        "z": 129.68578
+                    },
+                    "player_entity_id": null
+                }
+            },
+            {
+                "entity": {
+                    "id": 2508,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "NoJob": {}
+                    },
+                    "position": {
+                        "x": 176.50711,
+                        "y": 55.0,
+                        "z": 225.52522
+                    },
+                    "player_entity_id": null
+                }
+            },
+            {
+                "entity": {
+                    "id": 2509,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "NoJob": {}
+                    },
+                    "position": {
+                        "x": 176.56383,
+                        "y": 55.0,
+                        "z": 303.92914
+                    },
+                    "player_entity_id": null
+                }
+            },
+            {
+                "entity": {
+                    "id": 2510,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "NoJob": {}
+                    },
+                    "position": {
+                        "x": 177.43062,
+                        "y": 55.0,
+                        "z": 50.649937
+                    },
+                    "player_entity_id": null
+                }
+            }
+        ],
+        "barrier_modules": [
+            {
+                "entity": {
+                    "id": 2511,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 71.73567,
+                        "y": 48.0,
+                        "z": 164.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2512,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 79.23567,
+                        "y": 48.0,
+                        "z": 164.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2513,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 64.23567,
+                        "y": 48.0,
+                        "z": 164.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2514,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 84.23567,
+                        "y": 48.0,
+                        "z": 164.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2515,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 59.235672,
+                        "y": 48.0,
+                        "z": 164.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2516,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 89.23567,
+                        "y": 48.0,
+                        "z": 169.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2517,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 89.23567,
+                        "y": 48.0,
+                        "z": 174.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2518,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 89.23567,
+                        "y": 48.0,
+                        "z": 179.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2519,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 89.23567,
+                        "y": 48.0,
+                        "z": 184.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2520,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 89.23567,
+                        "y": 48.0,
+                        "z": 189.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2521,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 84.23567,
+                        "y": 48.0,
+                        "z": 194.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2522,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 79.23567,
+                        "y": 48.0,
+                        "z": 194.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2523,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 71.73567,
+                        "y": 48.0,
+                        "z": 194.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2524,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 64.23567,
+                        "y": 48.0,
+                        "z": 194.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2525,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 59.235672,
+                        "y": 48.0,
+                        "z": 194.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2526,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 54.235672,
+                        "y": 48.0,
+                        "z": 189.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2527,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 54.235672,
+                        "y": 48.0,
+                        "z": 169.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2528,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 54.235672,
+                        "y": 48.0,
+                        "z": 174.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2529,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 54.235672,
+                        "y": 48.0,
+                        "z": 179.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2530,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 54.235672,
+                        "y": 48.0,
+                        "z": 184.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2531,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 89.23567,
+                        "y": 48.0,
+                        "z": 164.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2532,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 89.23567,
+                        "y": 48.0,
+                        "z": 194.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2533,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 54.235672,
+                        "y": 48.0,
+                        "z": 194.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2534,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 54.235672,
+                        "y": 48.0,
+                        "z": 164.60947
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2505,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2535,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 292.9104,
+                        "y": 48.0,
+                        "z": 163.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2536,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 300.4104,
+                        "y": 48.0,
+                        "z": 163.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2537,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 285.4104,
+                        "y": 48.0,
+                        "z": 163.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2538,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 305.4104,
+                        "y": 48.0,
+                        "z": 163.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2539,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 280.4104,
+                        "y": 48.0,
+                        "z": 163.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2540,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 310.4104,
+                        "y": 48.0,
+                        "z": 168.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2541,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 310.4104,
+                        "y": 48.0,
+                        "z": 173.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2542,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 310.4104,
+                        "y": 48.0,
+                        "z": 178.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2543,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 310.4104,
+                        "y": 48.0,
+                        "z": 183.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2544,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 310.4104,
+                        "y": 48.0,
+                        "z": 188.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2545,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 305.4104,
+                        "y": 48.0,
+                        "z": 193.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2546,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 300.4104,
+                        "y": 48.0,
+                        "z": 193.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2547,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 292.9104,
+                        "y": 48.0,
+                        "z": 193.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2548,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 285.4104,
+                        "y": 48.0,
+                        "z": 193.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2549,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 280.4104,
+                        "y": 48.0,
+                        "z": 193.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2550,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 275.4104,
+                        "y": 48.0,
+                        "z": 188.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2551,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 275.4104,
+                        "y": 48.0,
+                        "z": 168.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2552,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 275.4104,
+                        "y": 48.0,
+                        "z": 173.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2553,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 275.4104,
+                        "y": 48.0,
+                        "z": 178.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2554,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 275.4104,
+                        "y": 48.0,
+                        "z": 183.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2555,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 310.4104,
+                        "y": 48.0,
+                        "z": 163.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2556,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 310.4104,
+                        "y": 48.0,
+                        "z": 193.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2557,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 275.4104,
+                        "y": 48.0,
+                        "z": 193.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2558,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 275.4104,
+                        "y": 48.0,
+                        "z": 163.43204
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2506,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2559,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 194.012,
+                        "y": 55.0,
+                        "z": 124.3012
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2560,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 194.012,
+                        "y": 55.0,
+                        "z": 129.3012
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2561,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 189.012,
+                        "y": 55.0,
+                        "z": 134.30118
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2562,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 184.012,
+                        "y": 55.0,
+                        "z": 134.30118
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2563,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 176.512,
+                        "y": 55.0,
+                        "z": 134.30118
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2564,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 169.012,
+                        "y": 55.0,
+                        "z": 134.30118
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2565,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 164.012,
+                        "y": 55.0,
+                        "z": 134.30118
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2566,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 159.012,
+                        "y": 55.0,
+                        "z": 129.3012
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2567,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 159.012,
+                        "y": 55.0,
+                        "z": 124.3012
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2568,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 194.012,
+                        "y": 55.0,
+                        "z": 134.30118
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2569,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 159.012,
+                        "y": 55.0,
+                        "z": 134.30118
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2570,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 159.0071,
+                        "y": 55.0,
+                        "z": 230.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2571,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 159.0071,
+                        "y": 55.0,
+                        "z": 225.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2572,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 164.0071,
+                        "y": 55.0,
+                        "z": 220.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2573,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 169.0071,
+                        "y": 55.0,
+                        "z": 220.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2574,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 176.5071,
+                        "y": 55.0,
+                        "z": 220.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2575,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 184.0071,
+                        "y": 55.0,
+                        "z": 220.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2576,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 189.0071,
+                        "y": 55.0,
+                        "z": 220.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2577,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 194.0071,
+                        "y": 55.0,
+                        "z": 225.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2578,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 194.0071,
+                        "y": 55.0,
+                        "z": 230.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2579,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 159.0071,
+                        "y": 55.0,
+                        "z": 220.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2580,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 194.0071,
+                        "y": 55.0,
+                        "z": 220.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2581,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 204.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2582,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 199.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2583,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 194.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2584,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 189.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2585,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 164.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2586,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 159.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2587,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 154.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2588,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 149.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2589,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 149.9306,
+                        "y": 55.0,
+                        "z": 50.64994
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2590,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 154.9306,
+                        "y": 55.0,
+                        "z": 50.649933
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2591,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 159.93057,
+                        "y": 55.0,
+                        "z": 50.649925
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2592,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 164.9306,
+                        "y": 55.0,
+                        "z": 50.64994
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2593,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 189.93059,
+                        "y": 55.0,
+                        "z": 50.649925
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2594,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 194.9306,
+                        "y": 55.0,
+                        "z": 50.64996
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2595,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 199.9306,
+                        "y": 55.0,
+                        "z": 50.64993
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2596,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 204.93062,
+                        "y": 55.0,
+                        "z": 50.649937
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2597,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 169.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2598,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 184.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2599,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 176.5638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2600,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 169.9306,
+                        "y": 55.0,
+                        "z": 50.64994
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2601,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 184.93059,
+                        "y": 55.0,
+                        "z": 50.649925
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2602,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 177.43059,
+                        "y": 55.0,
+                        "z": 50.649925
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2603,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 144.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2604,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 209.0638,
+                        "y": 55.0,
+                        "z": 303.92908
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2509,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2605,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 144.93059,
+                        "y": 55.0,
+                        "z": 50.649925
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2606,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 209.9306,
+                        "y": 55.0,
+                        "z": 50.649937
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2510,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2607,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 159.012,
+                        "y": 55.0,
+                        "z": 119.3012
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2608,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 194.012,
+                        "y": 55.0,
+                        "z": 119.3012
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2507,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2609,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 159.0071,
+                        "y": 55.0,
+                        "z": 235.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            },
+            {
+                "entity": {
+                    "id": 2610,
+                    "effects": [],
+                    "aspects": [
+                        {
+                            "EditorUniqueID": {}
+                        }
+                    ],
+                    "job": {
+                        "Idle": {}
+                    },
+                    "position": {
+                        "x": 194.0071,
+                        "y": 55.0,
+                        "z": 235.90982
+                    },
+                    "player_entity_id": null
+                },
+                "team": 255,
+                "set": 2508,
+                "state": 1,
+                "slots": 0,
+                "free_slots": 0,
+                "walkable": false
+            }
+        ]
+    }
+}
