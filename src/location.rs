@@ -1,52 +1,83 @@
 use api::*;
-use log::*;
+use std::collections::HashMap;
 
-use crate::game_info::GameInfo;
+use crate::utils;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub enum Location {
-    BotStartToken,
-    OpponentStartToken,
-    CenterToken,
+    North,
+    Northeast,
+    East,
+    Southeast,
+    South,
+    Southwest,
+    West,
+    Northwest,
+    Center,
+    Centernorth,
+    Centersouth,
 }
 
-impl Location {
-    pub fn to_pos2d(&self, game_info: &GameInfo) -> Position2D {
-        let dummy_pos = Position {
-            x: 0.,
-            y: 0.,
-            z: 0.,
+#[derive(Debug, PartialEq)]
+pub struct TokenSubLocation {
+    pub position: Position2D,
+    pub entity_id: Option<EntityId>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct PowerSubLocation {
+    pub position: Position2D,
+    pub entity_id: Option<EntityId>,
+}
+
+#[derive(Debug)]
+pub struct LocationPosition {
+    pub location: Location,
+    pub token: Option<TokenSubLocation>,
+    pub powers: Vec<PowerSubLocation>,
+}
+
+impl LocationPosition {
+    pub fn position(&self) -> Position2D {
+        let mut positions: Vec<&Position2D> = vec![];
+        if let Some(token) = self.token {
+            positions.push(&token.position);
         }
-        .to_2d();
-        match self {
-            Location::BotStartToken => {
-                if let Some(start_token_id) = game_info.bot.start_token {
-                    if let Some(start_token) = game_info.bot.token_slots.get(&start_token_id) {
-                        start_token.entity.position.to_2d()
-                    } else {
-                        warn!("Unable to get start token for bot");
-                        dummy_pos
-                    }
-                } else {
-                    warn!("Unable to get start token id for bot");
-                    dummy_pos
-                }
-            }
-            Location::OpponentStartToken => {
-                if let Some(start_token_id) = game_info.opponent.start_token {
-                    if let Some(start_token) = game_info.opponent.token_slots.get(&start_token_id) {
-                        start_token.entity.position.to_2d()
-                    } else {
-                        warn!("Unable to get start token for opponent");
-                        dummy_pos
-                    }
-                } else {
-                    warn!("Unable to get start token id for opponent");
-                    dummy_pos
-                }
-            }
-            // TODO: figure this out from the map token
-            Location::CenterToken => Position2D { x: 177., y: 177. },
-        }
+        let mut power_positions: Vec<&Position2D> =
+            self.powers.iter().map(|p| &p.position).collect();
+        positions.append(&mut power_positions);
+        utils::average_pos(positions)
     }
+}
+
+pub fn get_location_positions() -> HashMap<Location, LocationPosition> {
+    HashMap::from([(
+        Location::North,
+        LocationPosition {
+            location: Location::North,
+            token: Some(TokenSubLocation {
+                position: Position2D {
+                    x: 176.4518,
+                    y: 317.31332,
+                },
+                entity_id: None,
+            }),
+            powers: vec![
+                PowerSubLocation {
+                    position: Position2D {
+                        x: 183.4518,
+                        y: 317.31332,
+                    },
+                    entity_id: None,
+                },
+                PowerSubLocation {
+                    position: Position2D {
+                        x: 169.4518,
+                        y: 317.31332,
+                    },
+                    entity_id: None,
+                },
+            ],
+        },
+    )])
 }

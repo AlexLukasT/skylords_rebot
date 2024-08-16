@@ -1,3 +1,4 @@
+pub mod combat_controller;
 pub mod squad_controller;
 use api::*;
 

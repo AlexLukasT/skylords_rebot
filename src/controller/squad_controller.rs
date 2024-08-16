@@ -79,7 +79,11 @@ impl SquadController {
         {
             self.commands.push(Command::GroupGoto {
                 squads: vec![self.entity_id],
-                positions: vec![Location::CenterToken.to_pos2d(game_info)],
+                positions: vec![game_info
+                    .locations
+                    .get(&Location::North)
+                    .unwrap()
+                    .position()],
                 walk_mode: WalkMode::Normal,
                 orientation: 0.,
             });

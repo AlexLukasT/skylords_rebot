@@ -3,12 +3,15 @@ use log::*;
 use std::collections::HashMap;
 use std::num::NonZeroU32;
 
+use crate::location::{get_location_positions, Location, LocationPosition};
+
 #[derive(Debug)]
 pub struct GameInfo {
     pub state: Option<GameState>,
     pub bot: PlayerInfo,
     pub opponent: PlayerInfo,
     pub current_tick: Option<Tick>,
+    pub locations: HashMap<Location, LocationPosition>,
 }
 
 #[derive(Debug)]
@@ -54,6 +57,7 @@ impl GameInfo {
                 start_token: None,
             },
             current_tick: None,
+            locations: HashMap::new(),
         }
     }
 
@@ -103,9 +107,17 @@ impl GameInfo {
             );
         }
 
-        // find power slots for each player
+        let mut location_positions = get_location_positions();
+
         for power_slot in start_state.entities.power_slots {
             let slot_id = power_slot.entity.id;
+            info!(
+                "Found power slot {:?} at {:?}",
+                slot_id,
+                power_slot.entity.position.to_2d()
+            );
+
+            // find power slots for each player
             if let Some(power_slot_player_id) = power_slot.entity.player_entity_id {
                 if power_slot_player_id == self.bot.id {
                     self.bot.power_slots.insert(slot_id, power_slot);
@@ -113,11 +125,41 @@ impl GameInfo {
                     self.opponent.power_slots.insert(slot_id, power_slot);
                 }
             }
+
+            // assign power slot to it's location
+            let mut found_position = false;
+            for location_pos in location_positions.values() {
+                for (i, pos_power_slot) in location_pos.powers.iter().enumerate() {
+                    if power_slot.entity.position.x == pos_power_slot.position.x
+                        && power_slot.entity.position.y == pos_power_slot.position.y
+                    {
+                        // set the entity id in location_positions
+                        location_positions
+                            .entry(location_pos.location)
+                            .and_modify(|l| l.powers[i].entity_id = Some(slot_id));
+                        found_position = true;
+                        info!(
+                            "Assigned power slot {:?} to location {:?}.{:?}",
+                            slot_id, location_pos.location, i
+                        );
+                    }
+                }
+            }
+
+            if !found_position {
+                warn!("Unable to find location for power slot {:?}", slot_id);
+            }
         }
 
-        // find token slots for each player
         for token_slot in start_state.entities.token_slots {
             let slot_id = token_slot.entity.id;
+            info!(
+                "Found token slot {:?} at {:?}",
+                slot_id,
+                token_slot.entity.position.to_2d()
+            );
+
+            // find token slots for each player
             if let Some(token_slot_player_id) = token_slot.entity.player_entity_id {
                 if token_slot_player_id == self.bot.id {
                     self.bot.token_slots.insert(slot_id, token_slot);
@@ -127,7 +169,33 @@ impl GameInfo {
                     self.opponent.start_token = Some(slot_id);
                 }
             }
+
+            // assign token slot to it's location
+            let mut found_position = false;
+            for location_pos in location_positions.values() {
+                if let Some(pos_token_slot) = location_pos.token {
+                    if token_slot.entity.position.x == pos_token_slot.position.x
+                        && token_slot.entity.position.y == pos_token_slot.position.y
+                    {
+                        // set the entity id in location_positions
+                        location_positions
+                            .entry(location_pos.location)
+                            .and_modify(|l| l.token.unwrap().entity_id = Some(slot_id));
+                        found_position = true;
+                        info!(
+                            "Assigned token slot {:?} to location {:?}",
+                            slot_id, location_pos.location
+                        );
+                    }
+                }
+            }
+
+            if !found_position {
+                warn!("Unable to find location for token slot {:?}", slot_id);
+            }
         }
+
+        self.locations = location_positions;
     }
 
     pub fn parse_state(&mut self, state: GameState) {
