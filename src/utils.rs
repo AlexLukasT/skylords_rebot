@@ -14,11 +14,11 @@ pub fn threat_score(own_pos: &Position2D, target: &Squad, defending: bool) -> f3
     threat_multiplier * (15. - dist)
 }
 
-pub fn average_pos(positions: Vec<&Position2D>) -> Position2D {
+pub fn average_pos(positions: Vec<Position2D>) -> Position2D {
     let mut sum_x: f32 = 0.;
     let mut sum_y: f32 = 0.;
 
-    for pos in positions {
+    for pos in positions.iter() {
         sum_x += pos.x;
         sum_y += pos.y;
     }
