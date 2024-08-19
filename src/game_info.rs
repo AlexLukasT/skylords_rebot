@@ -111,11 +111,6 @@ impl GameInfo {
 
         for power_slot in start_state.entities.power_slots {
             let slot_id = power_slot.entity.id;
-            info!(
-                "Got power slot {:?} at {:?}",
-                slot_id,
-                power_slot.entity.position.to_2d()
-            );
 
             // assign power slot to it's location
             let mut found_location: Option<Location> = None;
@@ -132,7 +127,7 @@ impl GameInfo {
                         found_location = Some(*location);
                         found_power_index = Some(i);
                         found_entity_id = Some(slot_id);
-                        info!(
+                        debug!(
                             "Assigned power slot {:?} to location {:?}.{:?}",
                             slot_id, location, i
                         );
@@ -160,11 +155,6 @@ impl GameInfo {
 
         for token_slot in start_state.entities.token_slots {
             let slot_id = token_slot.entity.id;
-            info!(
-                "Got token slot {:?} at {:?}",
-                slot_id,
-                token_slot.entity.position.to_2d()
-            );
 
             // assign token slot to it's location
             let mut found_location: Option<Location> = None;
@@ -179,7 +169,7 @@ impl GameInfo {
                         // set the entity id in location_positions
                         found_location = Some(*location);
                         found_entity_id = Some(slot_id);
-                        info!(
+                        debug!(
                             "Assigned token slot {:?} to location {:?}",
                             slot_id, location
                         );

@@ -88,7 +88,7 @@ pub fn create_behavior_tree() -> BT<MacroAction, BlackBoardData> {
     ]);
     let blackboard = BlackBoardData {};
     let mut bt = BT::new(tree, blackboard);
-    // debug!("Macro behavior tree: {:?}", bt.get_graphviz());
+    debug!("Macro behavior tree: {:?}", bt.get_graphviz());
 
     bt
 }
