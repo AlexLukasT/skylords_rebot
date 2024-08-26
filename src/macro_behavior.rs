@@ -44,7 +44,11 @@ pub fn tick(
         match *args.action {
             MacroAction::CenterTaken => {
                 info!("Checking if Center is taken");
-                (Status::Success, args.dt)
+                if state.get_center_owner(game_info).is_some() {
+                    return (Status::Success, args.dt);
+                } else {
+                    return (Status::Failure, args.dt);
+                }
             }
             MacroAction::TakeCenter => {
                 info!("Taking Center");
@@ -52,13 +56,22 @@ pub fn tick(
             }
             MacroAction::CenterOwnedByMe => {
                 info!("Checking if Center is owned by me");
-                (Status::Success, args.dt)
+                if let Some(center_owner) = state.get_center_owner(game_info) {
+                    if center_owner == game_info.bot.id {
+                        return (Status::Success, args.dt);
+                    } else {
+                        return (Status::Failure, args.dt);
+                    }
+                } else {
+                    return (Status::Failure, args.dt);
+                }
             }
             MacroAction::DefendCenter => {
                 info!("Defending Center");
                 (Status::Success, args.dt)
             }
             MacroAction::AttackCenter => {
+                info!("Attacking Center");
                 state.attack_center(game_info, command_scheduler);
                 (Status::Running, args.dt) 
             }
@@ -99,35 +112,90 @@ impl MacroState {
             let num_squads = self.squad_controllers.len();
             let mut new_dreadcharger =
                 SquadController::new(format!("Dreadcharger{}", num_squads).to_string());
-            // new_dreadcharger.spawn(Dreadcharger, Location::BotStartToken.to_pos2d(&game_info));
+            new_dreadcharger.spawn(
+                Dreadcharger,
+                game_info
+                    .locations
+                    .get(&game_info.bot.start_location)
+                    .unwrap()
+                    .position(),
+            );
             self.squad_controllers.push(new_dreadcharger);
         }
 
-        // find the power slot closes to the center of the map
-        let mut targets: Vec<&PowerSlot> = game_info.opponent.power_slots.values().collect();
+        let mut target: Option<EntityId> = None;
+        let center = game_info.locations.get(&Location::Center).unwrap();
 
-        // let center_pos = Location::CenterToken.to_pos2d(&game_info);
-        // targets.sort_by(|a, b| {
-        //     let dist_a = utils::dist(&a.entity.position.to_2d(), &center_pos);
-        //     let dist_b = utils::dist(&b.entity.position.to_2d(), &center_pos);
-        //     dist_a.partial_cmp(&dist_b).unwrap()
-        // });
-        // let target = targets.first();
-        //
-        // if let Some(attack_target) = target {
-        //     for squad in self.squad_controllers.iter_mut() {
-        //         squad.attack(&attack_target.entity.id);
-        //     }
-        // } else {
-        //     warn!(
-        //         "Unable to find center target in {:?}",
-        //         game_info.opponent.power_slots
-        //     );
-        // }
+        // attack power slots first
+        for power_slot in &center.powers {
+            if game_info
+                .opponent
+                .power_slots
+                .contains_key(&power_slot.entity_id.unwrap())
+            {
+                target = power_slot.entity_id;
+            }
+        }
+
+        // power slots are not taken, attack the orb
+        if target.is_none() {
+            if let Some(token) = center.token {
+                target = token.entity_id;
+            } else {
+                warn!("Can not find slot token to attack");
+            }
+        }
+
+        if target.is_some() {
+            for squad in &mut self.squad_controllers {
+                squad.attack(&target.unwrap());
+            }
+        } else {
+            // neither one of the power wells nor the orb is taken, something is wrong
+            error!("Unable to find target on center, this should not happen");
+            return;
+        }
 
         for squad in self.squad_controllers.iter_mut() {
             let commands = squad.tick(game_info);
             command_scheduler.schedule_commands(commands);
         }
+    }
+
+    fn get_center_owner(&self, game_info: &GameInfo) -> Option<EntityId> {
+        let center = game_info.locations.get(&Location::Center).unwrap();
+
+        let power_slot_ids: Vec<EntityId> =
+            center.powers.iter().map(|p| p.entity_id.unwrap()).collect();
+
+        if game_info
+            .bot
+            .token_slots
+            .contains_key(&center.token.unwrap().entity_id.unwrap())
+        {
+            return Some(game_info.bot.id);
+        }
+
+        for power_slot_id in &power_slot_ids {
+            if game_info.bot.power_slots.contains_key(&power_slot_id) {
+                return Some(game_info.bot.id);
+            }
+        }
+
+        if game_info
+            .opponent
+            .token_slots
+            .contains_key(&center.token.unwrap().entity_id.unwrap())
+        {
+            return Some(game_info.opponent.id);
+        }
+
+        for power_slot_id in &power_slot_ids {
+            if game_info.opponent.power_slots.contains_key(&power_slot_id) {
+                return Some(game_info.opponent.id);
+            }
+        }
+
+        None
     }
 }
