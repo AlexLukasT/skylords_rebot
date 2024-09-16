@@ -1,6 +1,8 @@
 use api::*;
+use log::*;
 use std::collections::HashMap;
 
+use crate::game_info::GameInfo;
 use crate::utils;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -45,6 +47,31 @@ impl LocationPosition {
         let mut power_positions: Vec<Position2D> = self.powers.iter().map(|p| p.position).collect();
         positions.append(&mut power_positions);
         utils::average_pos(positions)
+    }
+}
+
+pub fn get_squad_position(entity_id: EntityId, game_info: &GameInfo) -> Position2D {
+    if game_info.bot.squads.contains_key(&entity_id) {
+        game_info
+            .bot
+            .squads
+            .get(&entity_id)
+            .unwrap()
+            .entity
+            .position
+            .to_2d()
+    } else if game_info.opponent.squads.contains_key(&entity_id) {
+        game_info
+            .opponent
+            .squads
+            .get(&entity_id)
+            .unwrap()
+            .entity
+            .position
+            .to_2d()
+    } else {
+        error!("Unable to get position for entity {:?}", entity_id);
+        Position2D { x: 0., y: 0. }
     }
 }
 

@@ -2,7 +2,6 @@ use crate::game_info::GameInfo;
 use api::sr_libs::utils::card_templates::CardTemplate::*;
 use api::Upgrade::U3;
 use api::*;
-use bonsai_bt::{Timer, BT};
 use log::{debug, info, warn};
 use std::borrow::Cow;
 
@@ -15,8 +14,6 @@ const NAME: &'static str = "SkylordsRebot";
 pub struct SkylordsRebot {
     deck: &'static Deck,
     game_info: GameInfo,
-    bt: BT<macro_behavior::MacroAction, macro_behavior::BlackBoardData>,
-    timer: Timer,
     macro_state: macro_behavior::MacroState,
     command_scheduler: CommandScheduler,
 }
@@ -32,17 +29,10 @@ impl warp_wrapper::BotImpl for SkylordsRebot {
 
     fn prepare_for_battle(map_info: &MapInfo, deck: &'static Deck) -> Self {
         info!("Preparing for: {:?}?", map_info.map);
-        let bt = macro_behavior::create_behavior_tree();
-        let timer = Timer::init_time();
         SkylordsRebot {
             deck,
             game_info: GameInfo::new(),
-            // controllers: vec![],
-            bt,
-            timer,
-            macro_state: macro_behavior::MacroState {
-                squad_controllers: vec![],
-            },
+            macro_state: macro_behavior::MacroState::new(),
             command_scheduler: CommandScheduler::new(),
         }
     }
@@ -70,9 +60,7 @@ fn on_tick(bot_state: &mut SkylordsRebot, state: GameState) -> Vec<Command> {
         .update_state(&bot_state.game_info);
 
     macro_behavior::tick(
-        &mut bot_state.bt,
         &bot_state.game_info,
-        &mut bot_state.timer,
         &mut bot_state.macro_state,
         &mut bot_state.command_scheduler,
     );

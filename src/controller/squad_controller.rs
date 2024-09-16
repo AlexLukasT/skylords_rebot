@@ -15,7 +15,7 @@ const DEST_REACHED_MARGIN: f32 = 5.;
 
 #[derive(Debug)]
 pub struct SquadController {
-    entity_id: EntityId,
+    pub entity_id: EntityId,
     state: SquadControllerState,
     commands: Vec<Command>,
     current_destination: Option<Position2D>,
