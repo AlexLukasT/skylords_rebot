@@ -60,6 +60,11 @@ impl SquadController {
         }
     }
 
+    pub fn initialized(&self) -> bool {
+        self.state != SquadControllerState::NotInitialized
+            && self.state != SquadControllerState::SpawnCommandSent
+    }
+
     pub fn move_squad(&mut self, game_info: &GameInfo, new_dest: Position2D) {
         let new_destination_provided: bool;
         if let Some(cur_dest) = self.current_destination {
@@ -79,11 +84,7 @@ impl SquadController {
         {
             self.commands.push(Command::GroupGoto {
                 squads: vec![self.entity_id],
-                positions: vec![game_info
-                    .locations
-                    .get(&Location::North)
-                    .unwrap()
-                    .position()],
+                positions: vec![new_dest],
                 walk_mode: WalkMode::Normal,
                 orientation: 0.,
             });
@@ -165,7 +166,6 @@ impl Controller for SquadController {
         if self.state == SquadControllerState::Moving {
             if let Some(squad) = game_info.bot.squads.get(&self.entity_id) {
                 if let Some(dest) = self.current_destination {
-                    debug!("{:?}", utils::dist(&squad.entity.position.to_2d(), &dest));
                     if utils::dist(&squad.entity.position.to_2d(), &dest) < DEST_REACHED_MARGIN {
                         // squad is close enough to the destination that we handle this as if it
                         // reached it's destination

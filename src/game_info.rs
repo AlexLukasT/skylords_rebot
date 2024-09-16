@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::num::NonZeroU32;
 
 use crate::location::{get_location_positions, Location, LocationPosition, TokenSubLocation};
+use crate::utils;
 
 #[derive(Debug)]
 pub struct GameInfo {
@@ -314,12 +315,51 @@ impl GameInfo {
     }
 }
 
+impl PlayerInfo {
+    pub fn get_closest_slot(&self, pos: &Position2D) -> Option<EntityId> {
+        // find closest power slot
+        let mut nearest_slot: Option<EntityId> = None;
+        let mut current_dist: f32 = f32::INFINITY;
+
+        for (entity_id, power_slot) in self.power_slots.iter() {
+            let dist = utils::dist(&pos, &power_slot.entity.position.to_2d());
+            if dist < current_dist {
+                nearest_slot = Some(*entity_id);
+                current_dist = dist;
+            }
+        }
+
+        if nearest_slot.is_none() {
+            // no power slot found, search for token slots
+            for (entity_id, token_slot) in self.token_slots.iter() {
+                let dist = utils::dist(&pos, &token_slot.entity.position.to_2d());
+                if dist < current_dist {
+                    nearest_slot = Some(*entity_id);
+                    current_dist = dist;
+                }
+            }
+        }
+
+        if nearest_slot.is_none() {
+            // this should not be possible as there would be no structure left and the game was won
+            error!("Unable to find structure, this should not be possible");
+            return None;
+        }
+
+        nearest_slot
+    }
+
+    pub fn bound_power(&self) -> f32 {
+        let mut bound_power: f32 = 0.;
+        for squad in self.squads.values() {
+            bound_power += squad.bound_power;
+        }
+        bound_power
+    }
+}
+
 fn get_tempo(player: &PlayerInfo) -> f32 {
     // Artificial quantity "Tempo" = Free Power + Bound Power - Void Power.
     // Primarily used to compare for each player on who currently has the tempo lead.
-    let mut bound_power: f32 = 0.;
-    for squad in player.squads.values() {
-        bound_power += squad.bound_power;
-    }
-    player.power + bound_power - player.void_power
+    player.power + player.bound_power() - player.void_power
 }

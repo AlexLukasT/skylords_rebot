@@ -22,6 +22,7 @@ enum CombatControllerState {
     #[default]
     Idling,
     SlotDefense,
+    AreaControl,
     AttackSquad,
     AttackSlotFocus,
     AttackSlotControl,
@@ -45,7 +46,9 @@ impl CombatController {
     }
 
     pub fn get_spawn_location(&self, game_info: &GameInfo) -> Position2D {
-        if self.squads.len() == 0 {
+        let ready_squads: Vec<&SquadController> =
+            self.squads.iter().filter(|s| s.initialized()).collect();
+        if ready_squads.len() == 0 {
             // no squads assigned yet, return the start token location
             game_info
                 .locations
@@ -54,7 +57,7 @@ impl CombatController {
                 .position()
         } else {
             // return the position of the first squad
-            get_squad_position(self.squads.first().unwrap().entity_id, game_info)
+            get_squad_position(ready_squads.first().unwrap().entity_id, game_info)
         }
     }
 
@@ -90,6 +93,48 @@ impl CombatController {
             for squad in &mut self.squads {
                 squad.attack(&enemy_squads_in_range[0].entity.id);
             }
+        }
+    }
+
+    pub fn control_area(
+        &mut self,
+        own_pos: &Position2D,
+        center: &Position2D,
+        radius: f32,
+        game_info: &GameInfo,
+    ) {
+        if self.state != CombatControllerState::AreaControl {
+            self.enter_state(CombatControllerState::AreaControl);
+        }
+
+        if utils::dist(own_pos, center) > radius {
+            // outside of the area to control -> move there first
+            for squad in &mut self.squads {
+                squad.move_squad(game_info, *center);
+            }
+            return;
+        }
+
+        let mut enemy_squads = get_enemy_squads_in_range(center, radius, game_info);
+
+        if enemy_squads.len() == 0 {
+            // no enemies in range -> move there
+            for squad in &mut self.squads {
+                squad.move_squad(game_info, *center);
+            }
+            return;
+        }
+
+        // multiple enemy squads in range -> attack the one with the highest threat score
+        enemy_squads.sort_by(|s1, s2| {
+            let threat_score1 = utils::threat_score(own_pos, s1, false);
+            let threat_score2 = utils::threat_score(own_pos, s2, false);
+            // sort in descending order
+            threat_score2.partial_cmp(&threat_score1).unwrap()
+        });
+
+        for squad in &mut self.squads {
+            squad.attack(&enemy_squads[0].entity.id);
         }
     }
 
