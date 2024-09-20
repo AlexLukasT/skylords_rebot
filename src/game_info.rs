@@ -1,6 +1,6 @@
 use api::*;
 use log::*;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt;
 use std::num::NonZeroU32;
 
@@ -12,7 +12,7 @@ pub struct GameInfo {
     pub bot: PlayerInfo,
     pub opponent: PlayerInfo,
     pub current_tick: Option<Tick>,
-    pub locations: HashMap<Location, LocationPosition>,
+    pub locations: BTreeMap<Location, LocationPosition>,
 }
 
 impl fmt::Debug for GameInfo {
@@ -29,12 +29,12 @@ impl fmt::Debug for GameInfo {
 pub struct PlayerInfo {
     pub id: EntityId,
     pub team: u8,
-    pub power_slots: HashMap<EntityId, PowerSlot>,
-    pub token_slots: HashMap<EntityId, TokenSlot>,
+    pub power_slots: BTreeMap<EntityId, PowerSlot>,
+    pub token_slots: BTreeMap<EntityId, TokenSlot>,
     pub power: f32,
     pub void_power: f32,
     pub tempo: f32, // Power + Bound Power - Void Power
-    pub squads: HashMap<EntityId, Squad>,
+    pub squads: BTreeMap<EntityId, Squad>,
     pub new_squad_ids: Vec<EntityId>, // Squads that were just spawned
     pub dead_squad_ids: Vec<EntityId>, // Squads that just died
     pub start_token: Option<EntityId>,
@@ -48,12 +48,12 @@ impl GameInfo {
             bot: PlayerInfo {
                 id: EntityId(NonZeroU32::new(1).unwrap()),
                 team: 0,
-                power_slots: HashMap::new(),
-                token_slots: HashMap::new(),
+                power_slots: BTreeMap::new(),
+                token_slots: BTreeMap::new(),
                 power: 0.,
                 void_power: 0.,
                 tempo: 0.,
-                squads: HashMap::new(),
+                squads: BTreeMap::new(),
                 new_squad_ids: vec![],
                 dead_squad_ids: vec![],
                 start_token: None,
@@ -62,19 +62,19 @@ impl GameInfo {
             opponent: PlayerInfo {
                 id: EntityId(NonZeroU32::new(1).unwrap()),
                 team: 0,
-                power_slots: HashMap::new(),
-                token_slots: HashMap::new(),
+                power_slots: BTreeMap::new(),
+                token_slots: BTreeMap::new(),
                 power: 0.,
                 void_power: 0.,
                 tempo: 0.,
-                squads: HashMap::new(),
+                squads: BTreeMap::new(),
                 new_squad_ids: vec![],
                 dead_squad_ids: vec![],
                 start_token: None,
                 start_location: Location::Center,
             },
             current_tick: None,
-            locations: HashMap::new(),
+            locations: BTreeMap::new(),
         }
     }
 

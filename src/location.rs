@@ -1,11 +1,11 @@
 use api::*;
 use log::*;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use crate::game_info::GameInfo;
 use crate::utils;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
 pub enum Location {
     North,
     Northeast,
@@ -75,8 +75,8 @@ pub fn get_squad_position(entity_id: EntityId, game_info: &GameInfo) -> Position
     }
 }
 
-pub fn get_location_positions() -> HashMap<Location, LocationPosition> {
-    HashMap::from([
+pub fn get_location_positions() -> BTreeMap<Location, LocationPosition> {
+    BTreeMap::from([
         (
             Location::North,
             LocationPosition {
