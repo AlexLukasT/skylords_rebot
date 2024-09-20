@@ -230,6 +230,19 @@ impl CombatController {
         }
     }
 
+    fn remove_dead_squads(&mut self, game_info: &GameInfo) {
+        let mut squad_indices_to_delete: Vec<usize> = vec![];
+        for (index, squad) in self.squads.iter().enumerate() {
+            if game_info.bot.dead_squad_ids.contains(&squad.entity_id) {
+                squad_indices_to_delete.push(index);
+            }
+        }
+
+        for index in squad_indices_to_delete {
+            self.squads.remove(index);
+        }
+    }
+
     fn slot_is_valid_target(&mut self, entity_id: &EntityId, game_info: &GameInfo) -> bool {
         // return true if the entity is slot owned by the opponent
         if game_info.opponent.power_slots.contains_key(&entity_id)
@@ -273,6 +286,8 @@ impl CombatController {
 
 impl Controller for CombatController {
     fn tick(&mut self, game_info: &GameInfo) -> Vec<Command> {
+        self.remove_dead_squads(game_info);
+
         let mut commands: Vec<Command> = vec![];
         for squad in self.squads.iter_mut() {
             commands.extend(squad.tick(game_info));

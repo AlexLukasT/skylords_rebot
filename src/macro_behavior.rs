@@ -24,8 +24,7 @@ pub fn tick(
         state.combat_controller.add_squad(squad);
     }
 
-    let center_owner_opt = state.get_center_owner(game_info);
-    if let Some(center_owner) = center_owner_opt {
+    if let Some(center_owner) = state.get_center_owner(game_info) {
         // center is taken
         if center_owner == game_info.bot.id {
             // owned by me

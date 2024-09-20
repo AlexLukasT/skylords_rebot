@@ -1,18 +1,28 @@
 use api::*;
 use log::*;
 use std::collections::HashMap;
+use std::fmt;
 use std::num::NonZeroU32;
 
 use crate::location::{get_location_positions, Location, LocationPosition, TokenSubLocation};
 use crate::utils;
 
-#[derive(Debug)]
 pub struct GameInfo {
     pub state: Option<GameState>,
     pub bot: PlayerInfo,
     pub opponent: PlayerInfo,
     pub current_tick: Option<Tick>,
     pub locations: HashMap<Location, LocationPosition>,
+}
+
+impl fmt::Debug for GameInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GameInfo")
+            .field("bot", &self.bot)
+            .field("opponent", &self.opponent)
+            .field("current_tick", &self.current_tick)
+            .finish()
+    }
 }
 
 #[derive(Debug)]
@@ -26,6 +36,7 @@ pub struct PlayerInfo {
     pub tempo: f32, // Power + Bound Power - Void Power
     pub squads: HashMap<EntityId, Squad>,
     pub new_squad_ids: Vec<EntityId>, // Squads that were just spawned
+    pub dead_squad_ids: Vec<EntityId>, // Squads that just died
     pub start_token: Option<EntityId>,
     pub start_location: Location,
 }
@@ -44,6 +55,7 @@ impl GameInfo {
                 tempo: 0.,
                 squads: HashMap::new(),
                 new_squad_ids: vec![],
+                dead_squad_ids: vec![],
                 start_token: None,
                 start_location: Location::Center,
             },
@@ -57,6 +69,7 @@ impl GameInfo {
                 tempo: 0.,
                 squads: HashMap::new(),
                 new_squad_ids: vec![],
+                dead_squad_ids: vec![],
                 start_token: None,
                 start_location: Location::Center,
             },
@@ -242,6 +255,10 @@ impl GameInfo {
         self.bot.new_squad_ids.clear();
         self.opponent.new_squad_ids.clear();
 
+        // clear dead squads
+        self.bot.dead_squad_ids.clear();
+        self.opponent.dead_squad_ids.clear();
+
         // set power for each player
         for player in &state.players {
             if player.id == self.bot.id {
@@ -254,17 +271,17 @@ impl GameInfo {
         }
 
         // assign units
-        for squad in state.entities.squads {
+        for squad in state.entities.squads.iter() {
             let squad_entity_id = squad.entity.id;
             if let Some(squad_player_id) = squad.entity.player_entity_id {
                 if squad_player_id == self.bot.id {
-                    if let None = self.bot.squads.insert(squad_entity_id, squad) {
+                    if let None = self.bot.squads.insert(squad_entity_id, squad.clone()) {
                         // the squad did not exist before
                         debug!("New squad {:?} was spawned for bot", squad_entity_id);
                         self.bot.new_squad_ids.push(squad_entity_id);
                     }
                 } else if squad_player_id == self.opponent.id {
-                    if let None = self.opponent.squads.insert(squad_entity_id, squad) {
+                    if let None = self.opponent.squads.insert(squad_entity_id, squad.clone()) {
                         // the squad did not exist before
                         debug!("New squad {:?} was spawned for opponent", squad_entity_id);
                         self.opponent.new_squad_ids.push(squad_entity_id);
@@ -272,6 +289,43 @@ impl GameInfo {
                 }
             } else {
                 warn!("Found squad {:?} not belonging to any player", squad);
+            }
+        }
+
+        // assign dead units
+        for entity_id in self.bot.squads.keys() {
+            let state_entity_ids: Vec<EntityId> =
+                state.entities.squads.iter().map(|s| s.entity.id).collect();
+            if !state_entity_ids.contains(entity_id) {
+                // entity_id is not in the state anymore -> died
+                self.bot.dead_squad_ids.push(*entity_id);
+            }
+        }
+        for entity_id in self.opponent.squads.keys() {
+            let state_entity_ids: Vec<EntityId> =
+                state.entities.squads.iter().map(|s| s.entity.id).collect();
+            if !state_entity_ids.contains(entity_id) {
+                // entity_id is not in the state anymore -> died
+                self.opponent.dead_squad_ids.push(*entity_id);
+            }
+        }
+
+        // remove dead units
+        for entity_id in self.bot.dead_squad_ids.iter() {
+            if let Some(removed_entity_id) = self.bot.squads.remove(entity_id) {
+                debug!("Removed dead squad {:?} from bot squads", removed_entity_id);
+            } else {
+                warn!("Did not find dead squad {:?} in bot squads", entity_id);
+            }
+        }
+        for entity_id in self.opponent.dead_squad_ids.iter() {
+            if let Some(removed_entity_id) = self.opponent.squads.remove(entity_id) {
+                debug!(
+                    "Removed dead squad {:?} from opponent squads",
+                    removed_entity_id
+                );
+            } else {
+                warn!("Did not find dead squad {:?} in opponent squads", entity_id);
             }
         }
 
@@ -310,8 +364,6 @@ impl GameInfo {
         // calculate and set tempo for each player
         self.bot.tempo = get_tempo(&self.bot);
         self.opponent.tempo = get_tempo(&self.opponent);
-
-        // TODO: handle killed units
     }
 }
 
