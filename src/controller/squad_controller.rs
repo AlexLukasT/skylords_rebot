@@ -11,6 +11,8 @@ use crate::controller::Controller;
 use crate::utils;
 
 const DEST_REACHED_MARGIN: f32 = 5.;
+// max number of ticks to wait until the squad is spawned
+const SPAWN_WAIT_TIMEOUT_TICKS: u32 = 10;
 
 #[derive(Debug)]
 pub struct SquadController {
@@ -20,6 +22,7 @@ pub struct SquadController {
     current_destination: Option<Position2D>,
     name: String,
     current_target: Option<EntityId>,
+    command_sent_tick: Option<Tick>,
 }
 
 #[derive(Debug, Default, PartialEq)]
@@ -30,6 +33,7 @@ enum SquadControllerState {
     SpawnCommandSent,
     Moving,
     Attacking,
+    SpawnError,
 }
 
 impl SquadController {
@@ -41,10 +45,11 @@ impl SquadController {
             current_destination: None,
             name,
             current_target: None,
+            command_sent_tick: None,
         }
     }
 
-    pub fn spawn(&mut self, card: CardTemplate, position: Position2D) {
+    pub fn spawn(&mut self, card: CardTemplate, position: Position2D, game_info: &GameInfo) {
         if self.state == SquadControllerState::NotInitialized {
             let card_id = CardId::new(card, U3);
             if let Some(card_pos) = BOT_DECK.cards.iter().position(|&c_id| c_id == card_id) {
@@ -52,6 +57,7 @@ impl SquadController {
                     card_position: card_pos as u8,
                     xy: position,
                 });
+                self.command_sent_tick = game_info.current_tick;
                 self.enter_state(SquadControllerState::SpawnCommandSent);
             } else {
                 warn!("Unable to find deck position for card {:?}", card_id);
@@ -78,9 +84,10 @@ impl SquadController {
             new_destination_provided = true;
         }
 
-        if (self.state == SquadControllerState::Idling
+        if ((self.state == SquadControllerState::Idling
             || self.state == SquadControllerState::Moving)
-            && new_destination_provided
+            && new_destination_provided)
+            || self.state == SquadControllerState::Attacking
         {
             self.commands.push(Command::GroupGoto {
                 squads: vec![self.entity_id],
@@ -128,6 +135,10 @@ impl SquadController {
         }
     }
 
+    pub fn has_spawn_error(&self) -> bool {
+        self.state == SquadControllerState::SpawnError
+    }
+
     fn enter_state(&mut self, new_state: SquadControllerState) {
         info!(
             "{:?} ({:?}) entered state {:?}",
@@ -152,6 +163,16 @@ impl Controller for SquadController {
                     self.entity_id, self.name
                 );
                 self.enter_state(SquadControllerState::Idling);
+            }
+
+            if let Some(cur_tick) = game_info.current_tick {
+                if let Some(last_tick) = self.command_sent_tick {
+                    if cur_tick.0.get() - last_tick.0.get() > SPAWN_WAIT_TIMEOUT_TICKS {
+                        // squad was not spawned and there was probably an error
+                        // -> mark this squad to be removed
+                        self.enter_state(SquadControllerState::SpawnError);
+                    }
+                }
             } else if num_new_squads > 1 {
                 // TODO: handle this properly. currently this relies
                 // on exactly one squad being spawned per tick and the

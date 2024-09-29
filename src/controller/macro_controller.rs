@@ -80,7 +80,8 @@ impl MacroController {
     }
 
     pub fn tick(&mut self, game_info: &GameInfo, command_scheduler: &mut CommandScheduler) {
-        self.combat_controller.remove_dead_squads(game_info);
+        self.combat_controller
+            .remove_dead_and_errored_squads(game_info);
         let current_pos = self.combat_controller.get_spawn_location(game_info);
         self.spawn_controller.set_spawn_pos(current_pos);
 
@@ -140,7 +141,7 @@ impl MacroController {
         }
 
         self.spawn_controller.spawn_single_unit();
-        self.combat_controller.move_squads(loc_pos, game_info);
+        self.combat_controller.move_squads(loc_pos);
     }
 
     fn run_take_well(&mut self, command_scheduler: &mut CommandScheduler, game_info: &GameInfo) {

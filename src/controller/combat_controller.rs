@@ -62,7 +62,7 @@ impl CombatController {
         }
     }
 
-    pub fn move_squads(&mut self, pos: Position2D, game_info: &GameInfo) {
+    pub fn move_squads(&mut self, pos: Position2D) {
         if self.state != CombatControllerState::Moving {
             self.enter_state(CombatControllerState::Moving);
         }
@@ -241,10 +241,10 @@ impl CombatController {
         }
     }
 
-    pub fn remove_dead_squads(&mut self, game_info: &GameInfo) {
+    pub fn remove_dead_and_errored_squads(&mut self, game_info: &GameInfo) {
         let mut squad_indices_to_delete: Vec<usize> = vec![];
         for (index, squad) in self.squads.iter().enumerate() {
-            if game_info.bot.dead_squad_ids.contains(&squad.entity_id) {
+            if game_info.bot.dead_squad_ids.contains(&squad.entity_id) || squad.has_spawn_error() {
                 squad_indices_to_delete.push(index);
             }
         }

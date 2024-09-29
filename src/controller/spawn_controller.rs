@@ -58,7 +58,7 @@ impl SpawnController {
                 if game_info.bot.squads.len() == 0
                     && command_scheduler.card_can_be_played(next_card.clone())
                 {
-                    vec![self.spawn_squad(next_card, num_squads)]
+                    vec![self.spawn_squad(next_card, num_squads, game_info)]
                 } else {
                     vec![]
                 }
@@ -71,7 +71,7 @@ impl SpawnController {
                 if bound_power_diff >= MIN_POWER_DIFF_SPAWN
                     && command_scheduler.card_can_be_played(next_card.clone())
                 {
-                    vec![self.spawn_squad(next_card, num_squads)]
+                    vec![self.spawn_squad(next_card, num_squads, game_info)]
                 } else {
                     vec![]
                 }
@@ -79,7 +79,7 @@ impl SpawnController {
 
             SpawnControllerState::SpawnOnLimit => {
                 if command_scheduler.card_can_be_played(next_card.clone()) {
-                    vec![self.spawn_squad(next_card, num_squads)]
+                    vec![self.spawn_squad(next_card, num_squads, game_info)]
                 } else {
                     vec![]
                 }
@@ -87,10 +87,15 @@ impl SpawnController {
         }
     }
 
-    fn spawn_squad(&self, card: CardTemplate, num_squads: usize) -> SquadController {
+    fn spawn_squad(
+        &self,
+        card: CardTemplate,
+        num_squads: usize,
+        game_info: &GameInfo,
+    ) -> SquadController {
         let name = format!("{:?}{:?}", card, num_squads).to_string();
         let mut squad = SquadController::new(name);
-        squad.spawn(card, self.spawn_pos);
+        squad.spawn(card, self.spawn_pos, game_info);
         squad
     }
 
