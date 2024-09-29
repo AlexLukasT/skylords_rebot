@@ -42,6 +42,8 @@ pub struct PlayerInfo {
     pub start_location: Location,
     pub new_power_slot_ids: Vec<EntityId>,
     pub new_token_slot_ids: Vec<EntityId>,
+    pub destroyed_power_slot_ids: Vec<EntityId>,
+    pub destroyed_token_slot_ids: Vec<EntityId>,
 }
 
 impl GameInfo {
@@ -63,6 +65,8 @@ impl GameInfo {
                 start_location: Location::Center,
                 new_power_slot_ids: vec![],
                 new_token_slot_ids: vec![],
+                destroyed_power_slot_ids: vec![],
+                destroyed_token_slot_ids: vec![],
             },
             opponent: PlayerInfo {
                 id: EntityId(NonZeroU32::new(1).unwrap()),
@@ -79,6 +83,8 @@ impl GameInfo {
                 start_location: Location::Center,
                 new_power_slot_ids: vec![],
                 new_token_slot_ids: vec![],
+                destroyed_power_slot_ids: vec![],
+                destroyed_token_slot_ids: vec![],
             },
             current_tick: None,
             locations: BTreeMap::new(),
@@ -275,6 +281,12 @@ impl GameInfo {
         self.bot.new_token_slot_ids.clear();
         self.opponent.new_token_slot_ids.clear();
 
+        // clear destroyed power and token slots
+        self.bot.destroyed_power_slot_ids.clear();
+        self.opponent.destroyed_power_slot_ids.clear();
+        self.bot.destroyed_token_slot_ids.clear();
+        self.opponent.destroyed_token_slot_ids.clear();
+
         // set power for each player
         for player in &state.players {
             if player.id == self.bot.id {
@@ -349,16 +361,20 @@ impl GameInfo {
         }
 
         // asign power slots
-        for power_slot in state.entities.power_slots {
+        for power_slot in state.entities.power_slots.iter() {
             let slot_id = power_slot.entity.id;
             if let Some(player_id) = power_slot.entity.player_entity_id {
                 if player_id == self.bot.id {
-                    if let None = self.bot.power_slots.insert(slot_id, power_slot) {
+                    if let None = self.bot.power_slots.insert(slot_id, power_slot.clone()) {
                         debug!("New power slot {:?} created for bot", slot_id);
                         self.bot.new_power_slot_ids.push(slot_id);
                     }
                 } else if player_id == self.opponent.id {
-                    if let None = self.opponent.power_slots.insert(slot_id, power_slot) {
+                    if let None = self
+                        .opponent
+                        .power_slots
+                        .insert(slot_id, power_slot.clone())
+                    {
                         debug!("New power slot {:?} created for opponent", slot_id);
                         self.opponent.new_power_slot_ids.push(slot_id);
                     }
@@ -367,20 +383,118 @@ impl GameInfo {
         }
 
         // assign token slots
-        for token_slot in state.entities.token_slots {
+        for token_slot in state.entities.token_slots.iter() {
             let slot_id = token_slot.entity.id;
             if let Some(player_id) = token_slot.entity.player_entity_id {
                 if player_id == self.bot.id {
-                    if let None = self.bot.token_slots.insert(slot_id, token_slot) {
+                    if let None = self.bot.token_slots.insert(slot_id, token_slot.clone()) {
                         debug!("New token slot {:?} created for bot", slot_id);
                         self.bot.new_token_slot_ids.push(slot_id);
                     }
                 } else if player_id == self.opponent.id {
-                    if let None = self.opponent.token_slots.insert(slot_id, token_slot) {
+                    if let None = self
+                        .opponent
+                        .token_slots
+                        .insert(slot_id, token_slot.clone())
+                    {
                         debug!("New token slot {:?} created for opponent", slot_id);
                         self.opponent.new_token_slot_ids.push(slot_id);
                     }
                 }
+            }
+        }
+
+        // assign destroyed power slots
+        for power_slot_id in self.bot.power_slots.keys() {
+            for power_slot in state.entities.power_slots.iter() {
+                if power_slot.entity.id == *power_slot_id
+                    && power_slot.entity.player_entity_id.is_none()
+                {
+                    self.bot.destroyed_power_slot_ids.push(*power_slot_id);
+                    break;
+                }
+            }
+        }
+        for power_slot_id in self.opponent.power_slots.keys() {
+            for power_slot in state.entities.power_slots.iter() {
+                if power_slot.entity.id == *power_slot_id
+                    && power_slot.entity.player_entity_id.is_none()
+                {
+                    self.opponent.destroyed_power_slot_ids.push(*power_slot_id);
+                    break;
+                }
+            }
+        }
+
+        // remove destroyed power slots
+        for slot_id in self.bot.destroyed_power_slot_ids.iter() {
+            if let Some(removed_slot) = self.bot.power_slots.remove(slot_id) {
+                debug!(
+                    "Removed destroyed power slot {:?} from bot",
+                    removed_slot.entity.id
+                );
+            } else {
+                warn!("Did not find destroyed power slot {:?} for bot", slot_id);
+            }
+        }
+        for slot_id in self.opponent.destroyed_power_slot_ids.iter() {
+            if let Some(removed_slot) = self.opponent.power_slots.remove(slot_id) {
+                debug!(
+                    "Removed destroyed power slot {:?} from opponent",
+                    removed_slot.entity.id
+                );
+            } else {
+                warn!(
+                    "Did not find destroyed power slot {:?} for opponent",
+                    slot_id
+                );
+            }
+        }
+
+        // assign destroyed token slots
+        for token_slot_id in self.bot.token_slots.keys() {
+            for token_slot in state.entities.token_slots.iter() {
+                if token_slot.entity.id == *token_slot_id
+                    && token_slot.entity.player_entity_id.is_none()
+                {
+                    self.bot.destroyed_token_slot_ids.push(*token_slot_id);
+                    break;
+                }
+            }
+        }
+        for token_slot_id in self.opponent.token_slots.keys() {
+            for token_slot in state.entities.token_slots.iter() {
+                if token_slot.entity.id == *token_slot_id
+                    && token_slot.entity.player_entity_id.is_none()
+                {
+                    self.opponent.destroyed_token_slot_ids.push(*token_slot_id);
+                    break;
+                }
+            }
+        }
+
+        // remove destroyed token slots
+        for slot_id in self.bot.destroyed_token_slot_ids.iter() {
+            if let Some(removed_slot) = self.bot.token_slots.remove(slot_id) {
+                debug!(
+                    "Removed destroyed token slot {:?} from bot",
+                    removed_slot.entity.id
+                );
+            } else {
+                warn!("Did not find destroyed token slot {:?} for bot", slot_id);
+            }
+        }
+        for slot_id in self.opponent.destroyed_token_slot_ids.iter() {
+            if let Some(removed_slot) = self.opponent.token_slots.remove(slot_id) {
+                debug!(
+                    "Removed destroyed token slot {:?} from opponent",
+                    removed_slot.entity.id
+                );
+            } else {
+                warn!(
+                    "Did not find destroyed token slot {:?} for opponent",
+                    slot_id
+                );
             }
         }
 
