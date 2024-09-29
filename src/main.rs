@@ -9,7 +9,6 @@ mod command_scheduler;
 mod controller;
 mod game_info;
 mod location;
-mod macro_behavior;
 mod utils;
 
 #[derive(Parser)]

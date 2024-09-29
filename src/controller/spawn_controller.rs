@@ -55,10 +55,12 @@ impl SpawnController {
             }
 
             SpawnControllerState::SingleUnit => {
-                if game_info.bot.squads.len() >= 1 {
-                    vec![]
-                } else {
+                if game_info.bot.squads.len() == 0
+                    && command_scheduler.card_can_be_played(next_card.clone())
+                {
                     vec![self.spawn_squad(next_card, num_squads)]
+                } else {
+                    vec![]
                 }
             }
 

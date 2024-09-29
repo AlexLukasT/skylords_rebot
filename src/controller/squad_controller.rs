@@ -8,7 +8,6 @@ use crate::game_info::GameInfo;
 
 use crate::bot::BOT_DECK;
 use crate::controller::Controller;
-use crate::location::Location;
 use crate::utils;
 
 const DEST_REACHED_MARGIN: f32 = 5.;
@@ -65,7 +64,7 @@ impl SquadController {
             && self.state != SquadControllerState::SpawnCommandSent
     }
 
-    pub fn move_squad(&mut self, game_info: &GameInfo, new_dest: Position2D) {
+    pub fn move_squad(&mut self, new_dest: Position2D) {
         let new_destination_provided: bool;
         if let Some(cur_dest) = self.current_destination {
             if utils::dist(&cur_dest, &new_dest) < DEST_REACHED_MARGIN {
@@ -79,8 +78,9 @@ impl SquadController {
             new_destination_provided = true;
         }
 
-        if self.state == SquadControllerState::Idling
-            || (self.state == SquadControllerState::Moving && new_destination_provided)
+        if (self.state == SquadControllerState::Idling
+            || self.state == SquadControllerState::Moving)
+            && new_destination_provided
         {
             self.commands.push(Command::GroupGoto {
                 squads: vec![self.entity_id],
@@ -139,7 +139,7 @@ impl SquadController {
 
 impl Controller for SquadController {
     fn tick(&mut self, game_info: &GameInfo) -> Vec<Command> {
-        let mut new_commands = self.commands.clone();
+        let new_commands = self.commands.clone();
         self.commands.clear();
 
         if self.state == SquadControllerState::SpawnCommandSent {

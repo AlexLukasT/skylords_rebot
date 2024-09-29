@@ -6,7 +6,7 @@ use log::{debug, info, warn};
 use std::borrow::Cow;
 
 use crate::command_scheduler::CommandScheduler;
-use crate::macro_behavior;
+use crate::controller::macro_controller::MacroController;
 
 // /AI: add SkylordsRebot Tutorial 4
 const NAME: &'static str = "SkylordsRebot";
@@ -14,7 +14,7 @@ const NAME: &'static str = "SkylordsRebot";
 pub struct SkylordsRebot {
     deck: &'static Deck,
     game_info: GameInfo,
-    macro_state: macro_behavior::MacroState,
+    macro_controller: MacroController,
     command_scheduler: CommandScheduler,
 }
 
@@ -32,7 +32,7 @@ impl warp_wrapper::BotImpl for SkylordsRebot {
         SkylordsRebot {
             deck,
             game_info: GameInfo::new(),
-            macro_state: macro_behavior::MacroState::new(),
+            macro_controller: MacroController::new(),
             command_scheduler: CommandScheduler::new(),
         }
     }
@@ -59,11 +59,9 @@ fn on_tick(bot_state: &mut SkylordsRebot, state: GameState) -> Vec<Command> {
         .command_scheduler
         .update_state(&bot_state.game_info);
 
-    macro_behavior::tick(
-        &bot_state.game_info,
-        &mut bot_state.macro_state,
-        &mut bot_state.command_scheduler,
-    );
+    bot_state
+        .macro_controller
+        .tick(&bot_state.game_info, &mut bot_state.command_scheduler);
 
     let scheduled_commands = bot_state.command_scheduler.get_scheduled_commands();
 

@@ -10,6 +10,7 @@ const CARD_PLAY_TICK_TIMEOUT: u32 = 10;
 pub struct CommandScheduler {
     tick_last_played_card: Option<Tick>,
     waiting_for_card_spawn: bool,
+    waiting_for_power_slot: bool,
     current_power: f32,
     scheduled_commands: Vec<Command>,
     current_tick: Option<Tick>,
@@ -20,6 +21,7 @@ impl CommandScheduler {
         CommandScheduler {
             tick_last_played_card: None,
             waiting_for_card_spawn: false,
+            waiting_for_power_slot: false,
             current_power: 0.,
             scheduled_commands: vec![],
             current_tick: None,
@@ -41,6 +43,14 @@ impl CommandScheduler {
             warn!("More than 1 squad was spawned at the same time");
         }
 
+        let new_power_slots = game_info.bot.new_power_slot_ids.len();
+        if new_power_slots == 1 {
+            // new power slot was created
+            self.waiting_for_power_slot = false;
+        } else if new_power_slots > 1 {
+            warn!("More than 1 power slot was created at the same time");
+        }
+
         self.current_power = game_info.bot.power;
         self.current_tick = game_info.current_tick;
     }
@@ -52,6 +62,7 @@ impl CommandScheduler {
     }
 
     pub fn schedule_command(&mut self, command: Command) {
+        // TODO: schedule commands that require power
         match command {
             Command::ProduceSquad {
                 card_position: _,
@@ -59,6 +70,9 @@ impl CommandScheduler {
             } => {
                 self.waiting_for_card_spawn = true;
                 self.tick_last_played_card = self.current_tick;
+            }
+            Command::PowerSlotBuild { slot_id: _ } => {
+                self.waiting_for_power_slot = true;
             }
             _ => {
                 //
@@ -94,5 +108,17 @@ impl CommandScheduler {
             warn!("Unable to find card {:?} in bot deck", card);
             false
         }
+    }
+
+    pub fn power_slot_can_be_built(&self) -> bool {
+        if self.waiting_for_power_slot {
+            return false;
+        }
+
+        self.current_power >= 100.
+    }
+
+    pub fn waiting_for_power_slot_to_finish(&self) -> bool {
+        self.waiting_for_power_slot
     }
 }

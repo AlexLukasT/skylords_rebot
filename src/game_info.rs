@@ -13,6 +13,7 @@ pub struct GameInfo {
     pub opponent: PlayerInfo,
     pub current_tick: Option<Tick>,
     pub locations: BTreeMap<Location, LocationPosition>,
+    pub figures: Vec<Figure>,
 }
 
 impl fmt::Debug for GameInfo {
@@ -39,6 +40,8 @@ pub struct PlayerInfo {
     pub dead_squad_ids: Vec<EntityId>, // Squads that just died
     pub start_token: Option<EntityId>,
     pub start_location: Location,
+    pub new_power_slot_ids: Vec<EntityId>,
+    pub new_token_slot_ids: Vec<EntityId>,
 }
 
 impl GameInfo {
@@ -58,6 +61,8 @@ impl GameInfo {
                 dead_squad_ids: vec![],
                 start_token: None,
                 start_location: Location::Center,
+                new_power_slot_ids: vec![],
+                new_token_slot_ids: vec![],
             },
             opponent: PlayerInfo {
                 id: EntityId(NonZeroU32::new(1).unwrap()),
@@ -72,9 +77,12 @@ impl GameInfo {
                 dead_squad_ids: vec![],
                 start_token: None,
                 start_location: Location::Center,
+                new_power_slot_ids: vec![],
+                new_token_slot_ids: vec![],
             },
             current_tick: None,
             locations: BTreeMap::new(),
+            figures: vec![],
         }
     }
 
@@ -244,6 +252,8 @@ impl GameInfo {
             warn!("Unable to find start locations");
         }
 
+        self.figures = start_state.entities.figures;
+
         debug!("Finished initializing game info");
     }
 
@@ -258,6 +268,12 @@ impl GameInfo {
         // clear dead squads
         self.bot.dead_squad_ids.clear();
         self.opponent.dead_squad_ids.clear();
+
+        // clear new power and token slots
+        self.bot.new_power_slot_ids.clear();
+        self.opponent.new_power_slot_ids.clear();
+        self.bot.new_token_slot_ids.clear();
+        self.opponent.new_token_slot_ids.clear();
 
         // set power for each player
         for player in &state.players {
@@ -312,17 +328,20 @@ impl GameInfo {
 
         // remove dead units
         for entity_id in self.bot.dead_squad_ids.iter() {
-            if let Some(removed_entity_id) = self.bot.squads.remove(entity_id) {
-                debug!("Removed dead squad {:?} from bot squads", removed_entity_id);
+            if let Some(removed_entity) = self.bot.squads.remove(entity_id) {
+                debug!(
+                    "Removed dead squad {:?} from bot squads",
+                    removed_entity.entity.id
+                );
             } else {
                 warn!("Did not find dead squad {:?} in bot squads", entity_id);
             }
         }
         for entity_id in self.opponent.dead_squad_ids.iter() {
-            if let Some(removed_entity_id) = self.opponent.squads.remove(entity_id) {
+            if let Some(removed_entity) = self.opponent.squads.remove(entity_id) {
                 debug!(
                     "Removed dead squad {:?} from opponent squads",
-                    removed_entity_id
+                    removed_entity.entity.id
                 );
             } else {
                 warn!("Did not find dead squad {:?} in opponent squads", entity_id);
@@ -336,10 +355,12 @@ impl GameInfo {
                 if player_id == self.bot.id {
                     if let None = self.bot.power_slots.insert(slot_id, power_slot) {
                         debug!("New power slot {:?} created for bot", slot_id);
+                        self.bot.new_power_slot_ids.push(slot_id);
                     }
                 } else if player_id == self.opponent.id {
                     if let None = self.opponent.power_slots.insert(slot_id, power_slot) {
                         debug!("New power slot {:?} created for opponent", slot_id);
+                        self.opponent.new_power_slot_ids.push(slot_id);
                     }
                 }
             }
@@ -352,18 +373,86 @@ impl GameInfo {
                 if player_id == self.bot.id {
                     if let None = self.bot.token_slots.insert(slot_id, token_slot) {
                         debug!("New token slot {:?} created for bot", slot_id);
+                        self.bot.new_token_slot_ids.push(slot_id);
                     }
                 } else if player_id == self.opponent.id {
                     if let None = self.opponent.token_slots.insert(slot_id, token_slot) {
                         debug!("New token slot {:?} created for opponent", slot_id);
+                        self.opponent.new_token_slot_ids.push(slot_id);
                     }
                 }
             }
         }
 
-        // calculate and set tempo for each player
-        self.bot.tempo = get_tempo(&self.bot);
-        self.opponent.tempo = get_tempo(&self.opponent);
+        // set figures
+        self.figures = state.entities.figures;
+    }
+
+    pub fn get_enemy_squads_in_range(&self, center: &Position2D, radius: f32) -> Vec<Squad> {
+        let mut enemy_squads_in_range: Vec<Squad> = vec![];
+        for squad in self.opponent.squads.values() {
+            let dist = utils::dist(center, &squad.entity.position.to_2d());
+            if dist < radius {
+                enemy_squads_in_range.push(squad.clone());
+            }
+        }
+        enemy_squads_in_range
+    }
+
+    pub fn get_squad_health(&self, entity_id: &EntityId) -> (f32, f32) {
+        // get the current and max health of a squad
+        let squad: &Squad;
+        if self.bot.squads.contains_key(entity_id) {
+            squad = self.bot.squads.get(entity_id).unwrap();
+        } else if self.opponent.squads.contains_key(entity_id) {
+            squad = self.opponent.squads.get(entity_id).unwrap();
+        } else {
+            error!(
+                "Unable to get health for squad {:?} as it does not exist",
+                entity_id
+            );
+            return (0., 0.);
+        }
+
+        let mut cur_hp: f32 = 0.;
+        let mut max_hp: f32 = 0.;
+        let mut found: usize = 0;
+        for figure_id in squad.figures.iter() {
+            for figure in self.figures.iter() {
+                if figure.entity.id == *figure_id {
+                    found += 1;
+                    let mut found_aspects = false;
+                    for aspect in figure.entity.aspects.iter() {
+                        match aspect {
+                            Aspect::Health {
+                                current_hp,
+                                cap_current_max,
+                            } => {
+                                found_aspects = true;
+                                cur_hp += current_hp;
+                                max_hp += cap_current_max;
+                            }
+                            _ => {}
+                        }
+                    }
+                    if !found_aspects {
+                        warn!("Unable to find health aspect for squad {:?}", entity_id);
+                    }
+                }
+            }
+        }
+
+        if found == 0 {
+            error!("Unable to find any figures for squad {:?}", entity_id);
+            (0., 0.)
+        } else {
+            (cur_hp, max_hp)
+        }
+    }
+
+    pub fn power_slot_diff(&self) -> i32 {
+        // Num(own power slots) - Num(opponent power slots)
+        self.bot.power_slots.len() as i32 - self.opponent.power_slots.len() as i32
     }
 }
 
@@ -408,10 +497,10 @@ impl PlayerInfo {
         }
         bound_power
     }
-}
 
-fn get_tempo(player: &PlayerInfo) -> f32 {
-    // Artificial quantity "Tempo" = Free Power + Bound Power - Void Power.
-    // Primarily used to compare for each player on who currently has the tempo lead.
-    player.power + player.bound_power() - player.void_power
+    pub fn get_tempo(&self) -> f32 {
+        // Artificial quantity "Tempo" = Free Power + Bound Power - Void Power.
+        // Primarily used to compare for each player on who currently has the tempo lead.
+        self.power + self.bound_power() - self.void_power
+    }
 }

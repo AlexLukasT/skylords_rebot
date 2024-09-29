@@ -1,4 +1,5 @@
 pub mod combat_controller;
+pub mod macro_controller;
 pub mod spawn_controller;
 pub mod squad_controller;
 use api::*;

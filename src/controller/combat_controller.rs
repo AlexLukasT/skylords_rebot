@@ -7,8 +7,8 @@ use crate::game_info::GameInfo;
 use crate::location::*;
 use crate::utils;
 
-const DEFENSE_AGGRO_RADIUS: f32 = 20.;
-const ATTACK_AGGR_RADIUS: f32 = 20.;
+const DEFENSE_AGGRO_RADIUS: f32 = 30.;
+const ATTACK_AGGR_RADIUS: f32 = 30.;
 
 #[derive(Debug)]
 pub struct CombatController {
@@ -21,6 +21,7 @@ pub struct CombatController {
 enum CombatControllerState {
     #[default]
     Idling,
+    Moving,
     SlotDefense,
     AreaControl,
     AttackSquad,
@@ -61,6 +62,16 @@ impl CombatController {
         }
     }
 
+    pub fn move_squads(&mut self, pos: Position2D, game_info: &GameInfo) {
+        if self.state != CombatControllerState::Moving {
+            self.enter_state(CombatControllerState::Moving);
+        }
+
+        for squad in &mut self.squads {
+            squad.move_squad(pos);
+        }
+    }
+
     pub fn defend(&mut self, location: &Location, game_info: &GameInfo) {
         if self.state != CombatControllerState::SlotDefense {
             self.enter_state(CombatControllerState::SlotDefense);
@@ -69,12 +80,12 @@ impl CombatController {
         // ToDo: how to deal with attacks outside of this range, e.g. Firedancers?
         let location_pos = game_info.locations.get(location).unwrap().position();
         let mut enemy_squads_in_range =
-            get_enemy_squads_in_range(&location_pos, DEFENSE_AGGRO_RADIUS, &game_info);
+            game_info.get_enemy_squads_in_range(&location_pos, DEFENSE_AGGRO_RADIUS);
 
         if enemy_squads_in_range.len() == 0 {
             // no enemy in range -> stay close to the defending location
             for squad in &mut self.squads {
-                squad.move_squad(game_info, location_pos);
+                squad.move_squad(location_pos);
             }
         } else if enemy_squads_in_range.len() == 1 {
             // one enemy in range -> attack that one
@@ -110,17 +121,17 @@ impl CombatController {
         if utils::dist(own_pos, center) > radius {
             // outside of the area to control -> move there first
             for squad in &mut self.squads {
-                squad.move_squad(game_info, *center);
+                squad.move_squad(*center);
             }
             return;
         }
 
-        let mut enemy_squads = get_enemy_squads_in_range(center, radius, game_info);
+        let mut enemy_squads = game_info.get_enemy_squads_in_range(center, radius);
 
         if enemy_squads.len() == 0 {
             // no enemies in range -> move there
             for squad in &mut self.squads {
-                squad.move_squad(game_info, *center);
+                squad.move_squad(*center);
             }
             return;
         }
@@ -203,7 +214,7 @@ impl CombatController {
                 .to_2d();
         }
         let mut enemy_squads_in_range =
-            get_enemy_squads_in_range(&slot_position, ATTACK_AGGR_RADIUS, game_info);
+            game_info.get_enemy_squads_in_range(&slot_position, ATTACK_AGGR_RADIUS);
 
         if enemy_squads_in_range.len() == 0 {
             // no enemy squads in range -> attack slot directly
@@ -230,7 +241,7 @@ impl CombatController {
         }
     }
 
-    fn remove_dead_squads(&mut self, game_info: &GameInfo) {
+    pub fn remove_dead_squads(&mut self, game_info: &GameInfo) {
         let mut squad_indices_to_delete: Vec<usize> = vec![];
         for (index, squad) in self.squads.iter().enumerate() {
             if game_info.bot.dead_squad_ids.contains(&squad.entity_id) {
@@ -238,8 +249,12 @@ impl CombatController {
             }
         }
 
-        for index in squad_indices_to_delete {
-            self.squads.remove(index);
+        // Sort indices in descending order to prevent issues with index shitfing
+        // after removing one element.
+        // Can use the unstable sort as there are no duplicate elements.
+        squad_indices_to_delete.sort_unstable_by(|a, b| b.cmp(a));
+        for index in squad_indices_to_delete.iter() {
+            self.squads.remove(*index);
         }
     }
 
@@ -276,9 +291,10 @@ impl CombatController {
     }
 
     fn enter_state(&mut self, new_state: CombatControllerState) {
+        let squad_ids: Vec<EntityId> = self.squads.iter().map(|s| s.entity_id).collect();
         info!(
             "CombatController for Squads {:?} entered state {:?}",
-            self.squads, new_state
+            squad_ids, new_state
         );
         self.state = new_state;
     }
@@ -286,25 +302,10 @@ impl CombatController {
 
 impl Controller for CombatController {
     fn tick(&mut self, game_info: &GameInfo) -> Vec<Command> {
-        self.remove_dead_squads(game_info);
-
         let mut commands: Vec<Command> = vec![];
         for squad in self.squads.iter_mut() {
             commands.extend(squad.tick(game_info));
         }
         commands
     }
-}
-
-// I tried making this a part of the CombatController struct but couldn't do it
-// because of issues with an immutable and a mutable references of self.
-fn get_enemy_squads_in_range(center: &Position2D, radius: f32, game_info: &GameInfo) -> Vec<Squad> {
-    let mut enemy_squads_in_range: Vec<Squad> = vec![];
-    for squad in game_info.opponent.squads.values() {
-        let dist = utils::dist(center, &squad.entity.position.to_2d());
-        if dist < radius {
-            enemy_squads_in_range.push(squad.clone());
-        }
-    }
-    enemy_squads_in_range
 }

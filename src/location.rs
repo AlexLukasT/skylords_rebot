@@ -75,6 +75,65 @@ pub fn get_squad_position(entity_id: EntityId, game_info: &GameInfo) -> Position
     }
 }
 
+pub fn get_location_owner(location: &Location, game_info: &GameInfo) -> Option<EntityId> {
+    let loc = game_info.locations.get(location).unwrap();
+
+    let power_slot_ids: Vec<EntityId> = loc.powers.iter().map(|p| p.entity_id.unwrap()).collect();
+
+    // check owner if there is an orb
+    if let Some(token) = loc.token {
+        if game_info
+            .bot
+            .token_slots
+            .contains_key(&token.entity_id.unwrap())
+        {
+            return Some(game_info.bot.id);
+        }
+        if game_info
+            .opponent
+            .token_slots
+            .contains_key(&token.entity_id.unwrap())
+        {
+            return Some(game_info.opponent.id);
+        }
+    }
+
+    for power_slot_id in &power_slot_ids {
+        if game_info.bot.power_slots.contains_key(&power_slot_id) {
+            return Some(game_info.bot.id);
+        }
+        if game_info.opponent.power_slots.contains_key(&power_slot_id) {
+            return Some(game_info.opponent.id);
+        }
+    }
+
+    None
+}
+
+pub fn get_next_free_power_slot(location: &Location, game_info: &GameInfo) -> Option<EntityId> {
+    let loc = game_info.locations.get(location).unwrap();
+
+    if let Some(owner_id) = get_location_owner(location, game_info) {
+        if owner_id != game_info.bot.id {
+            info!(
+                "Unable to get free power slot for location {:?} which is not owned by me",
+                location
+            );
+            return None;
+        }
+    }
+
+    for power_slot_loc in loc.powers.iter() {
+        let power_slot_id = power_slot_loc.entity_id.unwrap();
+        if !game_info.bot.power_slots.contains_key(&power_slot_id) {
+            // power slot is not owned by me
+            return Some(power_slot_id);
+        }
+    }
+
+    None
+}
+
 pub fn get_location_positions() -> BTreeMap<Location, LocationPosition> {
     BTreeMap::from([
         (
