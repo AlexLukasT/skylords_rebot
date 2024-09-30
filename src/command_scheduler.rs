@@ -55,6 +55,11 @@ impl CommandScheduler {
         self.current_tick = game_info.current_tick;
     }
 
+    pub fn unlock_card_spawn(&mut self) {
+        debug!("Spawn controller: unlocked card spawn");
+        self.waiting_for_card_spawn = false;
+    }
+
     pub fn schedule_commands(&mut self, commands: Vec<Command>) {
         for command in commands {
             self.schedule_command(command);

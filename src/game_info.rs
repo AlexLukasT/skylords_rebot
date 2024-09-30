@@ -7,6 +7,9 @@ use std::num::NonZeroU32;
 use crate::location::{get_location_positions, Location, LocationPosition, TokenSubLocation};
 use crate::utils;
 
+// minimum distance required to build structure
+pub const GROUND_PRESENCE_MIN_DIST: f32 = 5.;
+
 pub struct GameInfo {
     pub state: Option<GameState>,
     pub bot: PlayerInfo,
@@ -511,6 +514,17 @@ impl GameInfo {
             }
         }
         enemy_squads_in_range
+    }
+
+    pub fn has_ground_presence(&self, location: &Location) -> bool {
+        let loc_pos = self.locations.get(location).unwrap().position();
+        for squad in self.bot.squads.values() {
+            let dist = utils::dist(&loc_pos, &squad.entity.position.to_2d());
+            if dist < GROUND_PRESENCE_MIN_DIST {
+                return true;
+            }
+        }
+        false
     }
 
     pub fn get_squad_health(&self, entity_id: &EntityId) -> (f32, f32) {

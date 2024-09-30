@@ -258,6 +258,10 @@ impl CombatController {
         }
     }
 
+    pub fn has_errored_squads(&self) -> bool {
+        self.squads.iter().any(|s| s.has_spawn_error())
+    }
+
     fn slot_is_valid_target(&mut self, entity_id: &EntityId, game_info: &GameInfo) -> bool {
         // return true if the entity is slot owned by the opponent
         if game_info.opponent.power_slots.contains_key(&entity_id)

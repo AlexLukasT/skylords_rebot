@@ -6,6 +6,7 @@ use crate::command_scheduler::CommandScheduler;
 use crate::controller::combat_controller::CombatController;
 use crate::controller::spawn_controller::SpawnController;
 use crate::controller::Controller;
+use crate::game_info;
 use crate::game_info::GameInfo;
 use crate::location;
 use crate::location::Location;
@@ -13,8 +14,6 @@ use crate::utils;
 
 // radius around location to aggro on enemy squads
 const CONTROL_AREA_AGGRO_RADIUS: f32 = 80.;
-// minimum distance required to build structure
-const GROUND_PRESENCE_MIN_DIST: f32 = 5.;
 // required power before a well is built
 const MIN_POWER_BUILD_WELL: f32 = 200.;
 // minimum difference in tempo to consider it an advantage
@@ -80,6 +79,11 @@ impl MacroController {
     }
 
     pub fn tick(&mut self, game_info: &GameInfo, command_scheduler: &mut CommandScheduler) {
+        if self.combat_controller.has_errored_squads() {
+            // hacky -> remove spawn lock when a spawn command failed
+            command_scheduler.unlock_card_spawn();
+        }
+
         self.combat_controller
             .remove_dead_and_errored_squads(game_info);
         let current_pos = self.combat_controller.get_spawn_location(game_info);
@@ -131,7 +135,7 @@ impl MacroController {
             return;
         }
 
-        if enemy_squads_in_range.len() == 0 && dist_to_loc < GROUND_PRESENCE_MIN_DIST {
+        if enemy_squads_in_range.len() == 0 && dist_to_loc < game_info::GROUND_PRESENCE_MIN_DIST {
             // no enemies nearby and reached location
             if game_info.power_slot_diff() < 0 || game_info.bot.power > MIN_POWER_BUILD_WELL {
                 // opponent has one or more wells or bot has enough power to defend an attack
@@ -153,6 +157,12 @@ impl MacroController {
         if game_info.bot.new_power_slot_ids.len() > 0 {
             // new power slot was built -> advance to next state
             self.enter_state(MacroState::HealUnits);
+            return;
+        }
+
+        if !game_info.has_ground_presence(&self.focus_loc) {
+            // no own squad nearby -> get ground presence first
+            self.enter_state(MacroState::GroundPresenceNextLoc);
             return;
         }
 
