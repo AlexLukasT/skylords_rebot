@@ -22,21 +22,36 @@ const MIN_TEMPO_DIFF_ADVANTAGE: f32 = 0.;
 const DEFEND_LOCATION_AGGRO_RADIUS: f32 = 30.;
 
 // locations to prioritize when ahead or even
-const LOCATION_PRIOS_AHEAD: [Location; 10] = [
+const LOCATION_PRIOS_AHEAD_SOUTH_START: [Location; 11] = [
+    Location::South,
     Location::Center,
     Location::Centersouth,
     Location::Centernorth,
     Location::Southeast,
     Location::Southwest,
-    Location::West,
     Location::East,
+    Location::West,
     Location::Northwest,
     Location::Northeast,
     Location::North,
 ];
+const LOCATION_PRIOS_AHEAD_NORTH_START: [Location; 11] = [
+    Location::North,
+    Location::Center,
+    Location::Centernorth,
+    Location::Centersouth,
+    Location::Northwest,
+    Location::Northeast,
+    Location::West,
+    Location::East,
+    Location::Southeast,
+    Location::Southwest,
+    Location::South,
+];
 
 // locations to prioritize when behind
-const LOCATION_PRIOS_BEHIND: [Location; 10] = [
+const LOCATION_PRIOS_BEHIND_SOUTH_START: [Location; 11] = [
+    Location::South,
     Location::Southeast,
     Location::East,
     Location::Southwest,
@@ -47,6 +62,19 @@ const LOCATION_PRIOS_BEHIND: [Location; 10] = [
     Location::Northwest,
     Location::Northeast,
     Location::North,
+];
+const LOCATION_PRIOS_BEHIND_NORTH_START: [Location; 11] = [
+    Location::North,
+    Location::Northwest,
+    Location::West,
+    Location::Northeast,
+    Location::East,
+    Location::Centernorth,
+    Location::Center,
+    Location::Centersouth,
+    Location::Southeast,
+    Location::Southwest,
+    Location::South,
 ];
 
 #[derive(Default, Debug)]
@@ -338,8 +366,18 @@ impl MacroController {
 
     fn get_next_focus_loc(&self, game_info: &GameInfo) -> Location {
         if MacroController::tempo_advantage(game_info) {
+            let location_prios_ahead;
+            if game_info.bot.start_location == Location::South {
+                location_prios_ahead = LOCATION_PRIOS_AHEAD_SOUTH_START;
+            } else if game_info.bot.start_location == Location::North {
+                location_prios_ahead = LOCATION_PRIOS_AHEAD_NORTH_START;
+            } else {
+                error!("Unable to find prio locations based on start location, using south");
+                location_prios_ahead = LOCATION_PRIOS_AHEAD_SOUTH_START;
+            }
+
             // find the next location owned by the opponent if tempo is good
-            for loc in LOCATION_PRIOS_AHEAD[..9].iter() {
+            for loc in location_prios_ahead[..9].iter() {
                 if let Some(owner_id) = location::get_location_owner(&loc, game_info) {
                     if owner_id == game_info.opponent.id {
                         // location is owned by the opponent
@@ -360,7 +398,7 @@ impl MacroController {
             }
 
             // find the location not owned by anyone
-            for loc in LOCATION_PRIOS_AHEAD.iter() {
+            for loc in location_prios_ahead.iter() {
                 if let None = location::get_location_owner(&loc, game_info) {
                     return *loc;
                 }
@@ -369,8 +407,18 @@ impl MacroController {
             error!("Unable to find next free location from ahead");
             Location::North
         } else {
+            let location_prios_behind;
+            if game_info.bot.start_location == Location::South {
+                location_prios_behind = LOCATION_PRIOS_AHEAD_SOUTH_START;
+            } else if game_info.bot.start_location == Location::North {
+                location_prios_behind = LOCATION_PRIOS_AHEAD_NORTH_START;
+            } else {
+                error!("Unable to find prio locations based on start location, using south");
+                location_prios_behind = LOCATION_PRIOS_AHEAD_SOUTH_START;
+            }
+
             // find the location not owned by anyone
-            for loc in LOCATION_PRIOS_BEHIND.iter() {
+            for loc in location_prios_behind.iter() {
                 if let None = location::get_location_owner(&loc, game_info) {
                     return *loc;
                 }
