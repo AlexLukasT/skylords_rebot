@@ -56,7 +56,7 @@ impl SpawnController {
 
             SpawnControllerState::SingleUnit => {
                 if game_info.bot.squads.len() == 0
-                    && command_scheduler.card_can_be_played(next_card.clone())
+                    && command_scheduler.card_can_be_played(next_card.clone(), game_info)
                 {
                     vec![self.spawn_squad(next_card, num_squads, game_info)]
                 } else {
@@ -69,7 +69,7 @@ impl SpawnController {
                     game_info.opponent.bound_power() - game_info.bot.bound_power();
 
                 if bound_power_diff >= MIN_POWER_DIFF_SPAWN
-                    && command_scheduler.card_can_be_played(next_card.clone())
+                    && command_scheduler.card_can_be_played(next_card.clone(), game_info)
                 {
                     vec![self.spawn_squad(next_card, num_squads, game_info)]
                 } else {
@@ -78,7 +78,7 @@ impl SpawnController {
             }
 
             SpawnControllerState::SpawnOnLimit => {
-                if command_scheduler.card_can_be_played(next_card.clone()) {
+                if command_scheduler.card_can_be_played(next_card.clone(), game_info) {
                     vec![self.spawn_squad(next_card, num_squads, game_info)]
                 } else {
                     vec![]

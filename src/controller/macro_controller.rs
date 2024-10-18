@@ -100,7 +100,7 @@ impl MacroController {
     pub fn new() -> Self {
         MacroController {
             state: MacroState::MatchStart,
-            focus_loc: LOCATION_PRIOS_AHEAD[0],
+            focus_loc: Location::Center,
             combat_controller: CombatController::new(vec![]),
             spawn_controller: SpawnController::new(),
         }
@@ -326,7 +326,17 @@ impl MacroController {
             return;
         }
 
-        let owned_locations: Vec<Location> = LOCATION_PRIOS_AHEAD
+        let location_prios;
+        if game_info.bot.start_location == Location::South {
+            location_prios = LOCATION_PRIOS_AHEAD_SOUTH_START;
+        } else if game_info.bot.start_location == Location::North {
+            location_prios = LOCATION_PRIOS_AHEAD_NORTH_START;
+        } else {
+            error!("Unable to find prio locations based on start location, using south");
+            location_prios = LOCATION_PRIOS_AHEAD_SOUTH_START;
+        }
+
+        let owned_locations: Vec<Location> = location_prios
             .clone()
             .into_iter()
             .filter(|loc| {
@@ -409,12 +419,12 @@ impl MacroController {
         } else {
             let location_prios_behind;
             if game_info.bot.start_location == Location::South {
-                location_prios_behind = LOCATION_PRIOS_AHEAD_SOUTH_START;
+                location_prios_behind = LOCATION_PRIOS_BEHIND_SOUTH_START;
             } else if game_info.bot.start_location == Location::North {
-                location_prios_behind = LOCATION_PRIOS_AHEAD_NORTH_START;
+                location_prios_behind = LOCATION_PRIOS_BEHIND_NORTH_START;
             } else {
                 error!("Unable to find prio locations based on start location, using south");
-                location_prios_behind = LOCATION_PRIOS_AHEAD_SOUTH_START;
+                location_prios_behind = LOCATION_PRIOS_BEHIND_SOUTH_START;
             }
 
             // find the location not owned by anyone

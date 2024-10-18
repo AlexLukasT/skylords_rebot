@@ -1,3 +1,4 @@
+use crate::card_data::CardData;
 use api::*;
 use log::*;
 use std::collections::BTreeMap;
@@ -17,6 +18,7 @@ pub struct GameInfo {
     pub current_tick: Option<Tick>,
     pub locations: BTreeMap<Location, LocationPosition>,
     pub figures: Vec<Figure>,
+    pub card_data: CardData,
 }
 
 impl fmt::Debug for GameInfo {
@@ -51,6 +53,9 @@ pub struct PlayerInfo {
 
 impl GameInfo {
     pub fn new() -> GameInfo {
+        let mut card_data = CardData::new();
+        card_data.load();
+
         GameInfo {
             state: None,
             bot: PlayerInfo {
@@ -92,6 +97,7 @@ impl GameInfo {
             current_tick: None,
             locations: BTreeMap::new(),
             figures: vec![],
+            card_data,
         }
     }
 

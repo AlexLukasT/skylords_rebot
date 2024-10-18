@@ -2,7 +2,8 @@ use api::sr_libs::utils::card_templates::CardTemplate;
 use api::*;
 use log::*;
 
-use crate::bot::{BOT_DECK, DECK_POWER_COSTS};
+use crate::bot::BOT_DECK;
+use crate::card_data::CardData;
 use crate::game_info::GameInfo;
 
 const CARD_PLAY_TICK_TIMEOUT: u32 = 10;
@@ -86,7 +87,7 @@ impl CommandScheduler {
         self.scheduled_commands.push(command);
     }
 
-    pub fn card_can_be_played(&self, card: CardTemplate) -> bool {
+    pub fn card_can_be_played(&self, card: CardTemplate, game_info: &GameInfo) -> bool {
         if self.current_tick.is_none() {
             return false;
         }
@@ -102,17 +103,7 @@ impl CommandScheduler {
             return false;
         }
 
-        if let Some(card_pos) = BOT_DECK
-            .cards
-            .to_vec()
-            .iter()
-            .position(|id| id.0 == card.id() + Upgrade::U3 as u32)
-        {
-            self.current_power >= DECK_POWER_COSTS[card_pos]
-        } else {
-            warn!("Unable to find card {:?} in bot deck", card);
-            false
-        }
+        self.current_power >= game_info.card_data.get_card_power_cost(&card)
     }
 
     pub fn power_slot_can_be_built(&self) -> bool {

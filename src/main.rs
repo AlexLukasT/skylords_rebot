@@ -5,6 +5,7 @@ use log::{info, LevelFilter};
 use api::*;
 
 mod bot;
+mod card_data;
 mod command_scheduler;
 mod controller;
 mod game_info;
