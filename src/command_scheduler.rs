@@ -87,7 +87,7 @@ impl CommandScheduler {
         self.scheduled_commands.push(command);
     }
 
-    pub fn card_can_be_played(&self, card: CardTemplate, game_info: &GameInfo) -> bool {
+    pub fn card_can_be_played(&self, card: CardTemplate, game_info: &mut GameInfo) -> bool {
         if self.current_tick.is_none() {
             return false;
         }
@@ -99,6 +99,13 @@ impl CommandScheduler {
         if self.tick_last_played_card.is_some()
             && self.current_tick.unwrap().0.get()
                 < self.tick_last_played_card.unwrap().0.get() + CARD_PLAY_TICK_TIMEOUT
+        {
+            return false;
+        }
+
+        if !game_info
+            .card_data
+            .player_fullfills_orb_requirements(&card, &game_info.bot)
         {
             return false;
         }

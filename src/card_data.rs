@@ -1,16 +1,22 @@
 use api::sr_libs::utils::card_templates::CardTemplate;
 use api::*;
 use log::*;
+use std::collections::BTreeMap;
 use std::env;
 use std::fs;
 use std::path;
+
+use crate::game_info::PlayerInfo;
 
 const CARD_INFO_FILE_PATH: &'static str = "data/cards.json";
 
 pub struct CardData {
     data: serde_json::Value,
+    power_cost_cache: BTreeMap<String, f32>,
+    orb_requirement_cache: BTreeMap<String, CardOrbRequirements>,
 }
 
+#[derive(Clone, Copy)]
 pub struct CardOrbRequirements {
     total: i32,
     neutral: i32,
@@ -18,18 +24,14 @@ pub struct CardOrbRequirements {
     shadow: i32,
     nature: i32,
     frost: i32,
-    fireshadow: i32,
-    naturefrost: i32,
-    firenature: i32,
-    shadowfrost: i32,
-    shadownature: i32,
-    firefrost: i32,
 }
 
 impl CardData {
     pub fn new() -> Self {
         CardData {
             data: serde_json::Value::Null,
+            power_cost_cache: BTreeMap::new(),
+            orb_requirement_cache: BTreeMap::new(),
         }
     }
 
@@ -59,30 +61,46 @@ impl CardData {
         debug!("Finished loading card data");
     }
 
-    pub fn get_card_power_cost(&self, card_template: &CardTemplate) -> f32 {
-        if let Some(card) = self.get_card(card_template) {
-            return card["powerCost"].as_array().unwrap()[3].as_f64().unwrap() as f32;
+    pub fn get_card_power_cost(&mut self, card_template: &CardTemplate) -> f32 {
+        let name = card_template.name().to_lowercase().to_string();
+
+        if let Some(power_cost) = self.power_cost_cache.get(&name) {
+            return *power_cost;
         }
+
+        if let Some(card) = self.get_card(card_template) {
+            let power_cost = card["powerCost"].as_array().unwrap()[3].as_f64().unwrap() as f32;
+
+            self.power_cost_cache.insert(name, power_cost);
+
+            return power_cost;
+        }
+
         0.
     }
 
-    pub fn get_card_orbs(&self, card_template: &CardTemplate) -> CardOrbRequirements {
+    pub fn get_card_orbs(&mut self, card_template: &CardTemplate) -> CardOrbRequirements {
+        let name = card_template.name().to_lowercase().to_string();
+
+        if let Some(orb_requirements) = self.orb_requirement_cache.get(&name) {
+            return *orb_requirements;
+        }
+
         if let Some(card) = self.get_card(card_template) {
-            return CardOrbRequirements {
-                total: card["orbsTotal"].as_i64().unwrap() as i32,
+            let orb_requirements = CardOrbRequirements {
+                total: card["orbsTotal"].as_f64().unwrap() as i32,
                 neutral: card["orbsNeutral"].as_i64().unwrap() as i32,
                 fire: card["orbsFire"].as_i64().unwrap() as i32,
                 shadow: card["orbsShadow"].as_i64().unwrap() as i32,
                 nature: card["orbsNature"].as_i64().unwrap() as i32,
                 frost: card["orbsFrost"].as_i64().unwrap() as i32,
-                fireshadow: card["orbsFireShadow"].as_i64().unwrap() as i32,
-                naturefrost: card["orbsNatureFrost"].as_i64().unwrap() as i32,
-                firenature: card["orbsFireNature"].as_i64().unwrap() as i32,
-                shadowfrost: card["orbsShadowFrost"].as_i64().unwrap() as i32,
-                shadownature: card["orbsShadowNature"].as_i64().unwrap() as i32,
-                firefrost: card["orbsFireFrost"].as_i64().unwrap() as i32,
             };
+
+            self.orb_requirement_cache.insert(name, orb_requirements);
+
+            return orb_requirements;
         }
+
         CardOrbRequirements {
             total: 0,
             neutral: 0,
@@ -90,12 +108,47 @@ impl CardData {
             shadow: 0,
             nature: 0,
             frost: 0,
-            fireshadow: 0,
-            naturefrost: 0,
-            firenature: 0,
-            shadowfrost: 0,
-            shadownature: 0,
-            firefrost: 0,
         }
+    }
+
+    pub fn player_fullfills_orb_requirements(
+        &mut self,
+        card_template: &CardTemplate,
+        player_info: &PlayerInfo,
+    ) -> bool {
+        let orb_requirements = self.get_card_orbs(card_template);
+
+        // fire, shadow, nature, frost
+        let mut num_colors: Vec<i32> = vec![0; 4];
+        let mut has_starting_orb = false;
+        for token_slot in player_info.token_slots.values() {
+            match token_slot.color {
+                OrbColor::Fire => num_colors[0] += 1,
+                OrbColor::Shadow => num_colors[1] += 1,
+                OrbColor::Nature => num_colors[2] += 1,
+                OrbColor::Frost => num_colors[3] += 1,
+                OrbColor::Starting => has_starting_orb = true,
+                _ => {}
+            }
+        }
+
+        // for the starting orb any t1 unit can be played
+        if has_starting_orb {
+            return orb_requirements.total == 1;
+        }
+
+        // subtract "hard" color requirements
+        num_colors[0] -= orb_requirements.fire;
+        num_colors[1] -= orb_requirements.shadow;
+        num_colors[2] -= orb_requirements.nature;
+        num_colors[3] -= orb_requirements.frost;
+
+        // at least one requirement can not be fullfilled if any values is below 0
+        if num_colors.iter().any(|&n| n < 0) {
+            return false;
+        }
+
+        // check if any possible neutral requirements can be fullfilled
+        num_colors.iter().sum::<i32>() >= orb_requirements.neutral
     }
 }

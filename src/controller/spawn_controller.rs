@@ -36,7 +36,7 @@ impl SpawnController {
     pub fn tick(
         &mut self,
         command_scheduler: &CommandScheduler,
-        game_info: &GameInfo,
+        game_info: &mut GameInfo,
     ) -> Vec<SquadController> {
         // TODO: handle T2 + T3
 

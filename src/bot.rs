@@ -62,7 +62,7 @@ fn on_tick(bot_state: &mut SkylordsRebot, state: GameState) -> Vec<Command> {
 
     bot_state
         .macro_controller
-        .tick(&bot_state.game_info, &mut bot_state.command_scheduler);
+        .tick(&mut bot_state.game_info, &mut bot_state.command_scheduler);
 
     let scheduled_commands = bot_state.command_scheduler.get_scheduled_commands();
 

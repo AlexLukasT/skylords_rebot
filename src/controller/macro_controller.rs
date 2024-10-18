@@ -106,7 +106,7 @@ impl MacroController {
         }
     }
 
-    pub fn tick(&mut self, game_info: &GameInfo, command_scheduler: &mut CommandScheduler) {
+    pub fn tick(&mut self, game_info: &mut GameInfo, command_scheduler: &mut CommandScheduler) {
         if self.combat_controller.has_errored_squads() {
             // hacky -> remove spawn lock when a spawn command failed
             command_scheduler.unlock_card_spawn();
