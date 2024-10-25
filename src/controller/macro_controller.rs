@@ -117,6 +117,8 @@ impl MacroController {
         let current_pos = self.combat_controller.get_spawn_location(game_info);
         self.spawn_controller.set_spawn_pos(current_pos);
 
+        MacroController::repair_structures(game_info, command_scheduler);
+
         match self.state {
             MacroState::MatchStart => self.run_match_start(),
             MacroState::GroundPresenceNextLoc => self.run_ground_presence_next_loc(game_info),
@@ -436,6 +438,30 @@ impl MacroController {
 
             error!("Unable to find next free location from behind");
             Location::North
+        }
+    }
+
+    fn repair_structures(game_info: &GameInfo, command_scheduler: &mut CommandScheduler) {
+        // check power slots
+        for power_slot in game_info.bot.power_slots.values() {
+            let entity_id = power_slot.entity.id;
+            let (cur_hp, max_hp) = game_info.get_structure_health(&entity_id);
+            if cur_hp < max_hp {
+                command_scheduler.schedule_command(Command::RepairBuilding {
+                    building_id: entity_id,
+                });
+            }
+        }
+
+        // check token slots
+        for token_slot in game_info.bot.token_slots.values() {
+            let entity_id = token_slot.entity.id;
+            let (cur_hp, max_hp) = game_info.get_structure_health(&entity_id);
+            if cur_hp < max_hp {
+                command_scheduler.schedule_command(Command::RepairBuilding {
+                    building_id: entity_id,
+                });
+            }
         }
     }
 

@@ -584,6 +584,46 @@ impl GameInfo {
         }
     }
 
+    pub fn get_structure_health(&self, entity_id: &EntityId) -> (f32, f32) {
+        let entity: &Entity;
+        if self.bot.power_slots.contains_key(&entity_id) {
+            entity = &self.bot.power_slots.get(&entity_id).unwrap().entity;
+        } else if self.opponent.power_slots.contains_key(&entity_id) {
+            entity = &self.opponent.power_slots.get(&entity_id).unwrap().entity;
+        } else if self.bot.token_slots.contains_key(&entity_id) {
+            entity = &self.bot.token_slots.get(&entity_id).unwrap().entity;
+        } else if self.opponent.token_slots.contains_key(&entity_id) {
+            entity = &self.opponent.token_slots.get(&entity_id).unwrap().entity;
+        } else {
+            error!("Unable to get health for structure {entity_id:?} as it does not exist");
+            return (0., 0.);
+        }
+
+        let mut found_health_aspect = false;
+        let mut cur_hp: f32 = 0.;
+        let mut max_hp: f32 = 0.;
+        for aspect in entity.aspects.iter() {
+            match aspect {
+                Aspect::Health {
+                    current_hp,
+                    cap_current_max,
+                } => {
+                    found_health_aspect = true;
+                    cur_hp = *current_hp;
+                    max_hp = *cap_current_max;
+                }
+                _ => {}
+            }
+        }
+
+        if !found_health_aspect {
+            error!("Unable to find health aspect for power slot {entity_id:?}");
+            (0., 0.)
+        } else {
+            (cur_hp, max_hp)
+        }
+    }
+
     pub fn power_slot_diff(&self) -> i32 {
         // Num(own power slots) - Num(opponent power slots)
         self.bot.power_slots.len() as i32 - self.opponent.power_slots.len() as i32
