@@ -1,6 +1,7 @@
 use clap::Parser;
 use env_logger::Builder;
 use log::{info, LevelFilter};
+use std::fs::File;
 
 use api::*;
 
@@ -28,10 +29,14 @@ enum BotImplementations {
 
 #[tokio::main]
 async fn main() {
+    let file_name = chrono::Local::now().format("%Y-%m-%d_%H:%M:%S").to_string() + ".log";
+    let log_file = Box::new(File::create(file_name).expect("Can't create log file"));
     let mut builder = Builder::new();
     // set logging for hyper::proto module to info so it doesn't clutter the debug log
     builder.filter_module("hyper::proto", LevelFilter::Info);
     builder.filter_level(LevelFilter::Info);
+    // https://github.com/rust-cli/env_logger/issues/125#issuecomment-1406333500
+    builder.target(env_logger::Target::Pipe(log_file));
     builder.init();
 
     let args = Args::parse();
