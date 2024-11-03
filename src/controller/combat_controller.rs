@@ -46,16 +46,16 @@ impl CombatController {
         &self.squads
     }
 
-    pub fn get_spawn_location(&self, game_info: &GameInfo) -> Position2D {
+    pub fn get_spawn_location(
+        &self,
+        game_info: &GameInfo,
+        owned_location: &Location,
+    ) -> Position2D {
         let ready_squads: Vec<&SquadController> =
             self.squads.iter().filter(|s| s.initialized()).collect();
         if ready_squads.len() == 0 {
             // no squads assigned yet, return the start token location
-            game_info
-                .locations
-                .get(&game_info.bot.start_location)
-                .unwrap()
-                .position()
+            game_info.locations.get(owned_location).unwrap().position()
         } else {
             // return the position of the first squad
             get_squad_position(ready_squads.first().unwrap().entity_id, game_info)

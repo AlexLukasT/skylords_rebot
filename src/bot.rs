@@ -75,29 +75,29 @@ fn on_tick(bot_state: &mut SkylordsRebot, state: GameState) -> Vec<Command> {
 }
 
 pub const BOT_DECK: Deck = Deck {
-    name: Cow::Borrowed("ShadowNature"),
+    name: Cow::Borrowed("ShadowFrost"),
     cover_card_index: 0,
     cards: [
         CardId::new(Dreadcharger, U3),
         CardId::new(Forsaken, U3),
         CardId::new(NoxTrooper, U3),
+        CardId::new(Executor, U3),
         CardId::new(Motivate, U3),
         CardId::new(NastySurprise, U3),
         CardId::new(LifeWeaving, U3),
-        CardId::new(EnsnaringRoots, U3),
-        CardId::new(Hurricane, U3),
-        CardId::new(SurgeOfLight, U3),
-        CardId::new(CurseofOink, U3),
-        CardId::new(Tranquility, U3),
-        CardId::new(AuraofCorruption, U3),
+        CardId::new(FrostBiteAShadow, U3),
+        CardId::new(GlacierShell, U3),
+        CardId::new(KoboldTrick, U3),
         CardId::new(DarkelfAssassins, U3),
         CardId::new(Nightcrawler, U3),
-        CardId::new(AmiiPaladins, U3),
-        CardId::new(AmiiPhantom, U3),
-        CardId::new(Burrower, U3),
-        CardId::new(ShadowPhoenix, U3),
-        CardId::new(CultistMaster, U3),
-        CardId::new(AshbonePyro, U3),
+        CardId::new(StormsingerANature, U3),
+        CardId::new(LostReaverAShadow, U3),
+        CardId::new(Coldsnap, U3),
+        CardId::new(AuraofCorruption, U3),
+        CardId::new(TimelessOne, U3),
+        CardId::new(SilverwindLancers, U3),
+        CardId::new(Tremor, U3),
+        CardId::new(LostGrigoriAFire, U3),
     ],
 };
 
@@ -105,21 +105,32 @@ pub const BOT_CARDS: [CardTemplate; 20] = [
     Dreadcharger,
     Forsaken,
     NoxTrooper,
+    Executor,
     Motivate,
     NastySurprise,
     LifeWeaving,
-    EnsnaringRoots,
-    Hurricane,
-    SurgeOfLight,
-    CurseofOink,
-    Tranquility,
-    AuraofCorruption,
+    FrostBiteAShadow,
+    GlacierShell,
+    KoboldTrick,
     DarkelfAssassins,
     Nightcrawler,
-    AmiiPaladins,
-    AmiiPhantom,
-    Burrower,
-    ShadowPhoenix,
-    CultistMaster,
-    AshbonePyro,
+    StormsingerANature,
+    LostReaverAShadow,
+    Coldsnap,
+    AuraofCorruption,
+    TimelessOne,
+    SilverwindLancers,
+    Tremor,
+    LostGrigoriAFire,
 ];
+
+pub const BOT_ORBS: [CreateOrbColor; 3] = [
+    CreateOrbColor::Shadow,
+    CreateOrbColor::Frost,
+    CreateOrbColor::Frost,
+];
+
+// TODO: figure this out dynamically
+pub const BOT_T1_UNITS: [usize; 4] = [0, 1, 2, 3];
+pub const BOT_T2_UNITS: [usize; 4] = [10, 11, 12, 13];
+pub const BOT_T3_UNITS: [usize; 3] = [17, 18, 19];

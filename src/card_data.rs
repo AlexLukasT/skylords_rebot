@@ -214,11 +214,6 @@ impl CardData {
         }
     }
 
-    pub fn get_card_info_from_name(&mut self, name: String) -> CardInfo {
-        let card_id = self.get_card_id_from_name(&name);
-        self.get_card_info_from_id(card_id)
-    }
-
     pub fn card_id_without_upgrade(id: u32) -> u32 {
         if id >= (Upgrade::U3 as u32) {
             return id - (Upgrade::U3 as u32);
@@ -240,27 +235,6 @@ impl CardData {
         None
     }
 
-    fn get_card_id_from_name(&self, name: &String) -> u32 {
-        for card in self.data["data"].as_array().unwrap() {
-            if card["cardSlug"].as_str().unwrap().replace("-", "") == *name.to_lowercase() {
-                let ids = card["officialCardIds"].as_array().unwrap();
-
-                if ids.len() == 0 {
-                    error!("Unable to find CardId for {card:?}");
-                    return 0;
-                }
-                if ids.len() > 1 {
-                    warn!("Got more than one CardId for {card:?}");
-                    return 0;
-                }
-                return ids.get(0).unwrap().as_i64().unwrap() as u32;
-            }
-        }
-
-        error!("Unable to find card {name:?} in card data");
-        0
-    }
-
     pub fn load(&mut self) {
         let root_dir = path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         let full_path = root_dir.join(CARD_INFO_FILE_PATH);
@@ -280,7 +254,7 @@ impl CardData {
         player_info: &PlayerInfo,
     ) -> bool {
         let orb_requirements = self
-            .get_card_info_from_name(card_template.name().to_string())
+            .get_card_info_from_id(card_template.id())
             .orb_requirements;
 
         // fire, shadow, nature, frost

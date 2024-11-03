@@ -134,6 +134,29 @@ pub fn get_next_free_power_slot(location: &Location, game_info: &GameInfo) -> Op
     None
 }
 
+pub fn get_next_free_token_slot(location: &Location, game_info: &GameInfo) -> Option<EntityId> {
+    let loc = game_info.locations.get(location).unwrap();
+
+    if let Some(owner_id) = get_location_owner(location, game_info) {
+        if owner_id != game_info.bot.id {
+            info!(
+                "Unable to get free token slot for location {:?} which is not owned by me",
+                location
+            );
+            return None;
+        }
+    }
+
+    if let Some(token_slot) = loc.token {
+        let token_slot_id = token_slot.entity_id.unwrap();
+        if !game_info.bot.token_slots.contains_key(&token_slot_id) {
+            return Some(token_slot_id);
+        }
+    }
+
+    None
+}
+
 pub fn get_location_positions() -> BTreeMap<Location, LocationPosition> {
     BTreeMap::from([
         (

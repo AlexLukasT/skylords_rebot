@@ -1,7 +1,7 @@
 use api::*;
-use core::num::NonZeroU32;
 use log::*;
 
+use crate::bot::BOT_ORBS;
 use crate::command_scheduler::CommandScheduler;
 use crate::controller::combat_controller::CombatController;
 use crate::controller::spawn_controller::SpawnController;
@@ -85,13 +85,15 @@ enum MacroState {
     ControlArea,           // control the area by fighting enemy squds
     AttackLoc,             // attack a location
     TakeWell,              // take a power slot
+    AdvanceTier,           // take a token slot
     HealUnits,             // wait until all units are fully healed
     Defend,                // defend owned locations
 }
 
 pub struct MacroController {
     state: MacroState,
-    focus_loc: Location,
+    attack_focus_loc: Location,
+    latest_owning_loc: Location,
     pub combat_controller: CombatController,
     pub spawn_controller: SpawnController,
 }
@@ -100,7 +102,8 @@ impl MacroController {
     pub fn new() -> Self {
         MacroController {
             state: MacroState::MatchStart,
-            focus_loc: Location::Center,
+            attack_focus_loc: Location::Center,
+            latest_owning_loc: Location::Center,
             combat_controller: CombatController::new(vec![]),
             spawn_controller: SpawnController::new(),
         }
@@ -114,15 +117,18 @@ impl MacroController {
 
         self.combat_controller
             .remove_dead_and_errored_squads(game_info);
-        let current_pos = self.combat_controller.get_spawn_location(game_info);
+        let current_pos = self
+            .combat_controller
+            .get_spawn_location(game_info, &self.latest_owning_loc);
         self.spawn_controller.set_spawn_pos(current_pos);
 
         MacroController::repair_structures(game_info, command_scheduler);
 
         match self.state {
-            MacroState::MatchStart => self.run_match_start(),
+            MacroState::MatchStart => self.run_match_start(game_info),
             MacroState::GroundPresenceNextLoc => self.run_ground_presence_next_loc(game_info),
             MacroState::TakeWell => self.run_take_well(command_scheduler, game_info),
+            MacroState::AdvanceTier => self.run_advance_tier(command_scheduler, game_info),
             MacroState::HealUnits => self.run_heal_units(game_info),
             MacroState::ControlArea => self.run_control_area(game_info),
             MacroState::AttackLoc => self.run_attack_loc(game_info),
@@ -136,19 +142,36 @@ impl MacroController {
         command_scheduler.schedule_commands(squad_commands);
     }
 
-    fn run_match_start(&mut self) {
+    fn run_match_start(&mut self, game_info: &GameInfo) {
+        self.set_latest_owning_loc(game_info.bot.start_location);
         self.enter_state(MacroState::GroundPresenceNextLoc);
     }
 
     fn run_ground_presence_next_loc(&mut self, game_info: &GameInfo) {
-        self.spawn_controller.set_in_offense(true);
-        self.set_focus_loc(self.get_next_focus_loc(game_info));
+        if game_info.seconds_have_passed(180) && game_info.bot.token_slots.len() == 1 {
+            self.enter_state(MacroState::AdvanceTier);
+            return;
+        }
 
-        let current_pos = self.combat_controller.get_spawn_location(game_info);
-        let loc_pos = game_info.locations.get(&self.focus_loc).unwrap().position();
+        if game_info.seconds_have_passed(420) && game_info.bot.token_slots.len() == 2 {
+            self.enter_state(MacroState::AdvanceTier);
+            return;
+        }
+
+        self.spawn_controller.set_in_offense(true);
+        self.set_attack_focus_loc(self.get_next_attack_focus_loc(game_info));
+
+        let current_pos = self
+            .combat_controller
+            .get_spawn_location(game_info, &self.latest_owning_loc);
+        let loc_pos = game_info
+            .locations
+            .get(&self.attack_focus_loc)
+            .unwrap()
+            .position();
         let dist_to_loc = utils::dist(&current_pos, &loc_pos);
 
-        let loc_owner = location::get_location_owner(&self.focus_loc, game_info);
+        let loc_owner = location::get_location_owner(&self.attack_focus_loc, game_info);
         let is_enemy_loc = loc_owner.is_some_and(|entity_id| entity_id == game_info.opponent.id);
 
         let enemy_squads_in_range =
@@ -168,6 +191,21 @@ impl MacroController {
 
         if enemy_squads_in_range.len() == 0 && dist_to_loc < game_info::GROUND_PRESENCE_MIN_DIST {
             // no enemies nearby and reached location
+            if game_info.token_slot_diff() < 0 {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
+
+            if game_info.seconds_have_passed(180) && game_info.bot.token_slots.len() == 1 {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
+
+            if game_info.seconds_have_passed(420) && game_info.bot.token_slots.len() == 2 {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
+
             if game_info.power_slot_diff() < 0 || game_info.bot.power > MIN_POWER_BUILD_WELL {
                 // opponent has one or more wells or bot has enough power to defend an attack
                 self.enter_state(MacroState::TakeWell);
@@ -191,25 +229,81 @@ impl MacroController {
             return;
         }
 
-        if !game_info.has_ground_presence(&self.focus_loc) {
-            // no own squad nearby -> get ground presence first
+        if command_scheduler.power_slot_can_be_built() {
+            let offense_slot_id =
+                location::get_next_free_power_slot(&self.attack_focus_loc, game_info);
+
+            if offense_slot_id.is_some() {
+                let command = Command::PowerSlotBuild {
+                    slot_id: offense_slot_id.unwrap(),
+                };
+                command_scheduler.schedule_command(command);
+                self.set_latest_owning_loc(self.attack_focus_loc);
+                return;
+            }
+
+            let defense_slot_id =
+                location::get_next_free_power_slot(&self.latest_owning_loc, game_info);
+
+            if defense_slot_id.is_some() {
+                let command = Command::PowerSlotBuild {
+                    slot_id: defense_slot_id.unwrap(),
+                };
+                command_scheduler.schedule_command(command);
+                return;
+            }
+
+            // no free power well -> focus on next location
+            self.enter_state(MacroState::GroundPresenceNextLoc);
+        }
+    }
+
+    fn run_advance_tier(&mut self, command_scheduler: &mut CommandScheduler, game_info: &GameInfo) {
+        if command_scheduler.waiting_for_token_slot_to_finish() {
+            // waiting for token slot to be built -> stay in this state
+            return;
+        }
+
+        if game_info.bot.new_token_slot_ids.len() > 0 {
+            // new token slot was built -> advance to next state
+            self.enter_state(MacroState::HealUnits);
+            return;
+        }
+
+        if game_info.bot.token_slots.len() == 0 || game_info.bot.token_slots.len() == 3 {
+            // no token slots yet or already T3
             self.enter_state(MacroState::GroundPresenceNextLoc);
             return;
         }
 
-        if command_scheduler.power_slot_can_be_built() {
-            let slot_id = location::get_next_free_power_slot(&self.focus_loc, game_info);
+        if command_scheduler.token_slot_can_be_built(game_info) {
+            let offense_slot_id =
+                location::get_next_free_token_slot(&self.attack_focus_loc, game_info);
 
-            if slot_id.is_none() {
-                // no free power well -> focus on next location
-                self.enter_state(MacroState::GroundPresenceNextLoc);
+            if offense_slot_id.is_some() {
+                let command = Command::TokenSlotBuild {
+                    slot_id: offense_slot_id.unwrap(),
+                    color: BOT_ORBS[game_info.bot.token_slots.len()],
+                };
+                command_scheduler.schedule_command(command);
+                self.set_latest_owning_loc(self.attack_focus_loc);
                 return;
             }
 
-            let command = Command::PowerSlotBuild {
-                slot_id: slot_id.unwrap(),
-            };
-            command_scheduler.schedule_command(command);
+            let defense_slot_id =
+                location::get_next_free_token_slot(&self.latest_owning_loc, game_info);
+
+            if defense_slot_id.is_some() {
+                let command = Command::TokenSlotBuild {
+                    slot_id: defense_slot_id.unwrap(),
+                    color: BOT_ORBS[game_info.bot.token_slots.len()],
+                };
+                command_scheduler.schedule_command(command);
+                return;
+            }
+
+            // no free orb -> focus on next location
+            self.enter_state(MacroState::GroundPresenceNextLoc);
         }
     }
 
@@ -234,8 +328,14 @@ impl MacroController {
     fn run_control_area(&mut self, game_info: &GameInfo) {
         self.spawn_controller.set_in_offense(false);
 
-        let current_pos = self.combat_controller.get_spawn_location(game_info);
-        let loc_pos = game_info.locations.get(&self.focus_loc).unwrap().position();
+        let current_pos = self
+            .combat_controller
+            .get_spawn_location(game_info, &self.latest_owning_loc);
+        let loc_pos = game_info
+            .locations
+            .get(&self.attack_focus_loc)
+            .unwrap()
+            .position();
 
         if self.combat_controller.get_squads().len() == 0 {
             // all own squads are dead -> attack again or defend
@@ -268,7 +368,7 @@ impl MacroController {
     fn run_attack_loc(&mut self, game_info: &GameInfo) {
         self.spawn_controller.set_in_offense(true);
 
-        if location::get_location_owner(&self.focus_loc, game_info).is_none() {
+        if location::get_location_owner(&self.attack_focus_loc, game_info).is_none() {
             // location is not owned by anyone anymore -> control area
             self.enter_state(MacroState::ControlArea);
             return;
@@ -288,7 +388,7 @@ impl MacroController {
         self.spawn_controller.spawn_on_limit();
 
         let mut target: Option<EntityId> = None;
-        let loc = game_info.locations.get(&self.focus_loc).unwrap();
+        let loc = game_info.locations.get(&self.attack_focus_loc).unwrap();
 
         // attack power slots first
         for power_slot in &loc.powers {
@@ -317,13 +417,29 @@ impl MacroController {
             // neither one of the power wells nor the orb is taken, something is wrong
             error!(
                 "Unable to find target to attack on location {:?}, this should not happen",
-                self.focus_loc
+                self.attack_focus_loc
             );
         }
     }
 
     fn run_defend(&mut self, game_info: &GameInfo) {
         self.spawn_controller.set_in_offense(false);
+
+        if game_info.token_slot_diff() < 0 {
+            // opponent is a tier ahead -> build next orb
+            self.enter_state(MacroState::AdvanceTier);
+            return;
+        }
+
+        if game_info.seconds_have_passed(60) && game_info.bot.token_slots.len() == 1 {
+            self.enter_state(MacroState::AdvanceTier);
+            return;
+        }
+
+        if game_info.seconds_have_passed(120) && game_info.bot.token_slots.len() == 2 {
+            self.enter_state(MacroState::AdvanceTier);
+            return;
+        }
 
         if game_info.power_slot_diff() < 0 {
             // opponent has more power slots -> build another one
@@ -335,6 +451,12 @@ impl MacroController {
             // tempo advantage -> move towards next location
             self.enter_state(MacroState::GroundPresenceNextLoc);
             return;
+        }
+
+        if game_info.bot.token_slots.len() == 2 && game_info.bot.power >= 300. {
+            // I'm T3 and have a lot of energy, the opponent most likely bunkered in his base ->
+            // just attack
+            self.enter_state(MacroState::GroundPresenceNextLoc);
         }
 
         let location_prios;
@@ -385,7 +507,7 @@ impl MacroController {
         self.combat_controller.defend(&loc_to_defend, game_info);
     }
 
-    fn get_next_focus_loc(&self, game_info: &GameInfo) -> Location {
+    fn get_next_attack_focus_loc(&self, game_info: &GameInfo) -> Location {
         if MacroController::tempo_advantage(game_info) {
             let location_prios_ahead;
             if game_info.bot.start_location == Location::South {
@@ -408,12 +530,7 @@ impl MacroController {
             }
 
             // TODO: implement this properly
-            // 1 Tick = 10 ms -> 100 Ticks = 1s
-            let five_mins_in_ticks = NonZeroU32::new(5 * 60 * 100).unwrap();
-            if game_info
-                .current_tick
-                .is_some_and(|tick| tick.0 > five_mins_in_ticks)
-            {
+            if game_info.seconds_have_passed(300) {
                 // hacky: allow targetting enemy base after 5 mins
                 return Location::North;
             }
@@ -483,10 +600,20 @@ impl MacroController {
         self.state = new_state;
     }
 
-    fn set_focus_loc(&mut self, new_loc: Location) {
-        if new_loc != self.focus_loc {
-            info!("MacroController: focussing on location {:?}", new_loc);
-            self.focus_loc = new_loc;
+    fn set_attack_focus_loc(&mut self, new_loc: Location) {
+        if new_loc != self.attack_focus_loc {
+            info!(
+                "MacroController: focussing attacks on location {:?}",
+                new_loc
+            );
+            self.attack_focus_loc = new_loc;
+        }
+    }
+
+    fn set_latest_owning_loc(&mut self, new_loc: Location) {
+        if new_loc != self.latest_owning_loc {
+            info!("MacroController: controlling location {:?}", new_loc);
+            self.latest_owning_loc = new_loc;
         }
     }
 }

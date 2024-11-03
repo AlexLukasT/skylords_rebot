@@ -140,7 +140,7 @@ impl SquadController {
     }
 
     fn enter_state(&mut self, new_state: SquadControllerState) {
-        info!(
+        debug!(
             "{:?} ({:?}) entered state {:?}",
             self.name, self.entity_id, new_state
         );

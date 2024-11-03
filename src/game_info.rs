@@ -9,7 +9,7 @@ use crate::location::{get_location_positions, Location, LocationPosition, TokenS
 use crate::utils;
 
 // minimum distance required to build structure
-pub const GROUND_PRESENCE_MIN_DIST: f32 = 5.;
+pub const GROUND_PRESENCE_MIN_DIST: f32 = 8.;
 
 pub struct GameInfo {
     pub state: Option<GameState>,
@@ -375,7 +375,7 @@ impl GameInfo {
             if let Some(player_id) = power_slot.entity.player_entity_id {
                 if player_id == self.bot.id {
                     if let None = self.bot.power_slots.insert(slot_id, power_slot.clone()) {
-                        debug!("New power slot {:?} created for bot", slot_id);
+                        info!("New power slot {:?} created for bot", slot_id);
                         self.bot.new_power_slot_ids.push(slot_id);
                     }
                 } else if player_id == self.opponent.id {
@@ -384,7 +384,7 @@ impl GameInfo {
                         .power_slots
                         .insert(slot_id, power_slot.clone())
                     {
-                        debug!("New power slot {:?} created for opponent", slot_id);
+                        info!("New power slot {:?} created for opponent", slot_id);
                         self.opponent.new_power_slot_ids.push(slot_id);
                     }
                 }
@@ -397,7 +397,7 @@ impl GameInfo {
             if let Some(player_id) = token_slot.entity.player_entity_id {
                 if player_id == self.bot.id {
                     if let None = self.bot.token_slots.insert(slot_id, token_slot.clone()) {
-                        debug!("New token slot {:?} created for bot", slot_id);
+                        info!("New token slot {:?} created for bot", slot_id);
                         self.bot.new_token_slot_ids.push(slot_id);
                     }
                 } else if player_id == self.opponent.id {
@@ -406,7 +406,7 @@ impl GameInfo {
                         .token_slots
                         .insert(slot_id, token_slot.clone())
                     {
-                        debug!("New token slot {:?} created for opponent", slot_id);
+                        info!("New token slot {:?} created for opponent", slot_id);
                         self.opponent.new_token_slot_ids.push(slot_id);
                     }
                 }
@@ -438,7 +438,7 @@ impl GameInfo {
         // remove destroyed power slots
         for slot_id in self.bot.destroyed_power_slot_ids.iter() {
             if let Some(removed_slot) = self.bot.power_slots.remove(slot_id) {
-                debug!(
+                info!(
                     "Removed destroyed power slot {:?} from bot",
                     removed_slot.entity.id
                 );
@@ -448,7 +448,7 @@ impl GameInfo {
         }
         for slot_id in self.opponent.destroyed_power_slot_ids.iter() {
             if let Some(removed_slot) = self.opponent.power_slots.remove(slot_id) {
-                debug!(
+                info!(
                     "Removed destroyed power slot {:?} from opponent",
                     removed_slot.entity.id
                 );
@@ -485,7 +485,7 @@ impl GameInfo {
         // remove destroyed token slots
         for slot_id in self.bot.destroyed_token_slot_ids.iter() {
             if let Some(removed_slot) = self.bot.token_slots.remove(slot_id) {
-                debug!(
+                info!(
                     "Removed destroyed token slot {:?} from bot",
                     removed_slot.entity.id
                 );
@@ -495,7 +495,7 @@ impl GameInfo {
         }
         for slot_id in self.opponent.destroyed_token_slot_ids.iter() {
             if let Some(removed_slot) = self.opponent.token_slots.remove(slot_id) {
-                debug!(
+                info!(
                     "Removed destroyed token slot {:?} from opponent",
                     removed_slot.entity.id
                 );
@@ -627,6 +627,18 @@ impl GameInfo {
     pub fn power_slot_diff(&self) -> i32 {
         // Num(own power slots) - Num(opponent power slots)
         self.bot.power_slots.len() as i32 - self.opponent.power_slots.len() as i32
+    }
+
+    pub fn token_slot_diff(&self) -> i32 {
+        // Num(own token slots) - Num(opponent token slots)
+        self.bot.token_slots.len() as i32 - self.opponent.token_slots.len() as i32
+    }
+
+    pub fn seconds_have_passed(&self, seconds: u32) -> bool {
+        // 1 Tick = 100 ms -> 10 Ticks = 1s
+        let seconds_in_ticks = NonZeroU32::new(seconds * 10).unwrap();
+        self.current_tick
+            .is_some_and(|tick| tick.0 > seconds_in_ticks)
     }
 }
 

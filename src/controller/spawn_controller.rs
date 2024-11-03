@@ -4,8 +4,7 @@ use api::sr_libs::utils::card_templates::CardType;
 use api::*;
 use log::*;
 
-use crate::bot::BOT_CARDS;
-use crate::bot::BOT_DECK;
+use crate::bot::*;
 use crate::card_data::*;
 use crate::command_scheduler::CommandScheduler;
 use crate::controller::squad_controller::SquadController;
@@ -28,6 +27,7 @@ pub struct SpawnController {
     spawn_pos: Position2D,
     tier1_offense_spawn_policy: Option<Vec<CardTemplate>>,
     tier2_offense_spawn_policy: Option<Vec<CardTemplate>>,
+    tier3_offense_spawn_policy: Option<Vec<CardTemplate>>,
     in_offense: bool,
 }
 
@@ -47,6 +47,7 @@ impl SpawnController {
             spawn_pos: Position2D { x: 0., y: 0. },
             tier1_offense_spawn_policy: None,
             tier2_offense_spawn_policy: None,
+            tier3_offense_spawn_policy: None,
             in_offense: true,
         }
     }
@@ -148,7 +149,10 @@ impl SpawnController {
     }
 
     fn set_spawn_policy(&mut self, game_info: &GameInfo) {
-        if game_info.opponent.token_slots.len() == 1 && self.tier1_offense_spawn_policy.is_none() {
+        let num_bot_token_slots = game_info.bot.token_slots.len();
+        let num_opponent_token_slots = game_info.opponent.token_slots.len();
+
+        if num_opponent_token_slots == 1 && self.tier1_offense_spawn_policy.is_none() {
             let token_slots: Vec<&TokenSlot> = game_info.opponent.token_slots.values().collect();
             let orb_color = token_slots[0].color;
 
@@ -162,12 +166,44 @@ impl SpawnController {
                 Some(SpawnController::get_tier1_offense_spawn_policy(orb_color));
         }
 
-        if game_info.opponent.token_slots.len() == 2 && self.tier2_offense_spawn_policy.is_none() {
-            let token_slots: Vec<&TokenSlot> = game_info.opponent.token_slots.values().collect();
-            let orb_colors = (token_slots[0].color, token_slots[1].color);
-            info!("Setting T2 spawn policy to {orb_colors:?}");
-            self.tier2_offense_spawn_policy =
-                Some(SpawnController::get_tier2_offense_spawn_policy(orb_colors));
+        if num_bot_token_slots == 2
+            && (self.tier2_offense_spawn_policy.is_none()
+                || game_info.opponent.new_token_slot_ids.len() > 0)
+        {
+            if num_opponent_token_slots == 2 {
+                let token_slots: Vec<&TokenSlot> =
+                    game_info.opponent.token_slots.values().collect();
+                let orb_colors = (token_slots[0].color, token_slots[1].color);
+                info!("Setting T2 spawn policy to {orb_colors:?}");
+                self.tier2_offense_spawn_policy =
+                    Some(SpawnController::get_tier2_offense_spawn_policy(orb_colors));
+            } else {
+                info!("Setting T2 spawn policy to universal");
+                self.tier2_offense_spawn_policy =
+                    Some(SpawnController::get_tier2_univeral_spawn_policy());
+            }
+        }
+
+        if num_opponent_token_slots == 3
+            && (self.tier3_offense_spawn_policy.is_none()
+                || game_info.opponent.new_token_slot_ids.len() > 0)
+        {
+            if num_opponent_token_slots == 3 {
+                let token_slots: Vec<&TokenSlot> =
+                    game_info.opponent.token_slots.values().collect();
+                let orb_colors = (
+                    token_slots[0].color,
+                    token_slots[1].color,
+                    token_slots[2].color,
+                );
+                info!("Setting T3 spawn policy to {orb_colors:?}");
+                self.tier3_offense_spawn_policy =
+                    Some(SpawnController::get_tier3_offense_spawn_policy(orb_colors));
+            } else {
+                info!("Setting T3 spawn policy to universal");
+                self.tier3_offense_spawn_policy =
+                    Some(SpawnController::get_tier3_univeral_spawn_policy());
+            }
         }
     }
 
@@ -180,13 +216,21 @@ impl SpawnController {
 
     fn get_next_card(&self, game_info: &mut GameInfo) -> CardTemplate {
         let card_policy: Option<Vec<CardTemplate>>;
-        if game_info.bot.token_slots.len() == 2 {
-            // try T2 first
+
+        if game_info.bot.token_slots.len() == 3 {
+            // try T3 first
             if self.in_offense {
                 // when in offense choose cards based on fixed policy
-                card_policy = self.tier2_offense_spawn_policy.clone();
+                card_policy = self.tier3_offense_spawn_policy.clone();
             } else {
                 // when in defense choose cards based on enemy squads
+                card_policy = Some(self.get_defense_spawn_policy(game_info, Tier::Tier3));
+            }
+        } else if game_info.bot.token_slots.len() == 2 {
+            // T2
+            if self.in_offense {
+                card_policy = self.tier2_offense_spawn_policy.clone();
+            } else {
                 card_policy = Some(self.get_defense_spawn_policy(game_info, Tier::Tier2));
             }
         } else {
@@ -237,11 +281,10 @@ impl SpawnController {
             .collect();
         let most_common_defense_type = utils::most_frequent_element(squad_defense_types);
 
-        // TODO: figure this out dynamically
         let defender_indices: Vec<usize> = match tier {
-            Tier::Tier1 => vec![0, 1, 2],
-            Tier::Tier2 => vec![12, 13, 14, 15],
-            Tier::Tier3 => vec![18, 19],
+            Tier::Tier1 => BOT_T1_UNITS.to_vec(),
+            Tier::Tier2 => BOT_T2_UNITS.to_vec(),
+            Tier::Tier3 => BOT_T3_UNITS.to_vec(),
         };
 
         if most_common_offense_type.is_some() && most_common_defense_type.is_some() {
@@ -284,7 +327,6 @@ impl SpawnController {
             // still no defender found -> return the first one
             vec![BOT_CARDS[defender_indices[0]]]
         } else {
-            warn!("Unable to find offense and defense type for opponent squads");
             vec![BOT_CARDS[defender_indices[0]]]
         }
     }
@@ -297,57 +339,75 @@ impl SpawnController {
         }
     }
 
+    fn get_tier2_univeral_spawn_policy() -> Vec<CardTemplate> {
+        // used when bot is T2 but opponent is still T1
+        vec![Nightcrawler, LostReaverAShadow, DarkelfAssassins]
+    }
+
     fn get_tier2_offense_spawn_policy(opponent_colors: (OrbColor, OrbColor)) -> Vec<CardTemplate> {
         match opponent_colors {
             // Pure Fire
-            (OrbColor::Fire, OrbColor::Fire) => vec![Nightcrawler, AmiiPhantom],
+            (OrbColor::Fire, OrbColor::Fire) => vec![Nightcrawler, LostReaverAShadow],
 
             // Pure Shadow
             (OrbColor::Shadow, OrbColor::Shadow) => {
-                vec![Nightcrawler, DarkelfAssassins, AmiiPhantom]
+                vec![Nightcrawler, LostReaverAShadow, DarkelfAssassins]
             }
 
             // Pure Nature
             (OrbColor::Nature, OrbColor::Nature) => {
-                vec![Burrower, DarkelfAssassins]
+                vec![Nightcrawler, DarkelfAssassins, Nightcrawler]
             }
 
             // Pure Frost
             (OrbColor::Frost, OrbColor::Frost) => {
-                vec![AmiiPaladins, DarkelfAssassins]
+                vec![Nightcrawler, DarkelfAssassins]
             }
 
             // Fire Nature
             (OrbColor::Fire, OrbColor::Nature) | (OrbColor::Nature, OrbColor::Fire) => {
-                vec![Nightcrawler, AmiiPhantom]
+                vec![Nightcrawler, LostReaverAShadow, DarkelfAssassins]
             }
 
             // Fire Shadow
             (OrbColor::Fire, OrbColor::Shadow) | (OrbColor::Shadow, OrbColor::Fire) => {
-                vec![Nightcrawler, AmiiPhantom]
+                vec![Nightcrawler, LostReaverAShadow, DarkelfAssassins]
             }
 
             // Fire Frost
             (OrbColor::Fire, OrbColor::Frost) | (OrbColor::Frost, OrbColor::Fire) => {
-                vec![Nightcrawler, DarkelfAssassins]
+                vec![Nightcrawler, LostReaverAShadow, DarkelfAssassins]
             }
 
             // Shadow Nature
             (OrbColor::Shadow, OrbColor::Nature) | (OrbColor::Nature, OrbColor::Shadow) => {
-                vec![Nightcrawler, AmiiPhantom]
+                vec![Nightcrawler, LostReaverAShadow, DarkelfAssassins]
             }
 
             // Shadow Frost
             (OrbColor::Shadow, OrbColor::Frost) | (OrbColor::Frost, OrbColor::Shadow) => {
-                vec![Nightcrawler, DarkelfAssassins, AmiiPhantom]
+                vec![Nightcrawler, LostReaverAShadow, DarkelfAssassins]
             }
 
             // Nature Frost
             (OrbColor::Nature, OrbColor::Frost) | (OrbColor::Frost, OrbColor::Nature) => {
-                vec![Nightcrawler, AmiiPhantom]
+                vec![Nightcrawler, LostReaverAShadow, DarkelfAssassins]
             }
 
             _ => vec![],
+        }
+    }
+
+    fn get_tier3_univeral_spawn_policy() -> Vec<CardTemplate> {
+        // used when bot is T3 but opponent is still T1 or T2
+        vec![SilverwindLancers, Tremor]
+    }
+
+    fn get_tier3_offense_spawn_policy(
+        opponent_colors: (OrbColor, OrbColor, OrbColor),
+    ) -> Vec<CardTemplate> {
+        match opponent_colors {
+            _ => vec![SilverwindLancers, Tremor],
         }
     }
 }

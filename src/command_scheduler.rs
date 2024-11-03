@@ -11,6 +11,7 @@ pub struct CommandScheduler {
     tick_last_played_card: Option<Tick>,
     waiting_for_card_spawn: bool,
     waiting_for_power_slot: bool,
+    waiting_for_token_slot: bool,
     current_power: f32,
     scheduled_commands: Vec<Command>,
     current_tick: Option<Tick>,
@@ -22,6 +23,7 @@ impl CommandScheduler {
             tick_last_played_card: None,
             waiting_for_card_spawn: false,
             waiting_for_power_slot: false,
+            waiting_for_token_slot: false,
             current_power: 0.,
             scheduled_commands: vec![],
             current_tick: None,
@@ -111,7 +113,7 @@ impl CommandScheduler {
 
         let card_cost = game_info
             .card_data
-            .get_card_info_from_name(card.name().to_string())
+            .get_card_info_from_id(card.id())
             .power_cost;
 
         self.current_power >= card_cost
@@ -127,5 +129,28 @@ impl CommandScheduler {
 
     pub fn waiting_for_power_slot_to_finish(&self) -> bool {
         self.waiting_for_power_slot
+    }
+
+    pub fn token_slot_can_be_built(&self, game_info: &GameInfo) -> bool {
+        if self.waiting_for_token_slot {
+            return false;
+        }
+
+        let num_token_slots = game_info.bot.token_slots.len();
+
+        if num_token_slots == 1 {
+            // advance to T2
+            self.current_power >= 150.
+        } else if num_token_slots == 2 {
+            // advance to T3
+            self.current_power >= 250.
+        } else {
+            // T3 is maximum
+            false
+        }
+    }
+
+    pub fn waiting_for_token_slot_to_finish(&self) -> bool {
+        self.waiting_for_token_slot
     }
 }
