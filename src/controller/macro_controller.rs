@@ -309,6 +309,12 @@ impl MacroController {
 
     fn run_heal_units(&mut self, game_info: &GameInfo) {
         self.spawn_controller.set_in_offense(false);
+        let pos = game_info
+            .locations
+            .get(&self.latest_owning_loc)
+            .unwrap()
+            .position();
+        self.combat_controller.move_squads(pos);
 
         for squad_id in game_info.bot.squads.keys() {
             let (current_health, max_health) = game_info.get_squad_health(squad_id);
