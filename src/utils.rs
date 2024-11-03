@@ -1,6 +1,5 @@
 use api::*;
-
-use crate::game_info::GameInfo;
+use std::collections::BTreeMap;
 
 pub fn dist(pos1: &Position2D, pos2: &Position2D) -> f32 {
     f32::sqrt((pos1.x - pos2.x).powi(2) + (pos1.y - pos2.y).powi(2))
@@ -29,4 +28,16 @@ pub fn average_pos(positions: Vec<Position2D>) -> Position2D {
         x: sum_x / positions.len() as f32,
         y: sum_y / positions.len() as f32,
     }
+}
+
+pub fn most_frequent_element<T>(v: Vec<T>) -> Option<T>
+where
+    T: Ord,
+{
+    let mut counts: BTreeMap<T, usize> = BTreeMap::new();
+    for el in v {
+        counts.entry(el).and_modify(|curr| *curr += 1).or_insert(1);
+    }
+
+    counts.into_iter().max_by_key(|(_, v)| *v).map(|(k, _)| k)
 }

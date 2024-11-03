@@ -141,6 +141,7 @@ impl MacroController {
     }
 
     fn run_ground_presence_next_loc(&mut self, game_info: &GameInfo) {
+        self.spawn_controller.set_in_offense(true);
         self.set_focus_loc(self.get_next_focus_loc(game_info));
 
         let current_pos = self.combat_controller.get_spawn_location(game_info);
@@ -213,6 +214,8 @@ impl MacroController {
     }
 
     fn run_heal_units(&mut self, game_info: &GameInfo) {
+        self.spawn_controller.set_in_offense(false);
+
         for squad_id in game_info.bot.squads.keys() {
             let (current_health, max_health) = game_info.get_squad_health(squad_id);
             if current_health < max_health {
@@ -229,6 +232,8 @@ impl MacroController {
     }
 
     fn run_control_area(&mut self, game_info: &GameInfo) {
+        self.spawn_controller.set_in_offense(false);
+
         let current_pos = self.combat_controller.get_spawn_location(game_info);
         let loc_pos = game_info.locations.get(&self.focus_loc).unwrap().position();
 
@@ -261,6 +266,8 @@ impl MacroController {
     }
 
     fn run_attack_loc(&mut self, game_info: &GameInfo) {
+        self.spawn_controller.set_in_offense(true);
+
         if location::get_location_owner(&self.focus_loc, game_info).is_none() {
             // location is not owned by anyone anymore -> control area
             self.enter_state(MacroState::ControlArea);
@@ -316,6 +323,8 @@ impl MacroController {
     }
 
     fn run_defend(&mut self, game_info: &GameInfo) {
+        self.spawn_controller.set_in_offense(false);
+
         if game_info.power_slot_diff() < 0 {
             // opponent has more power slots -> build another one
             self.enter_state(MacroState::TakeWell);

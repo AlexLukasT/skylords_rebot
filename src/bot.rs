@@ -1,4 +1,5 @@
 use crate::game_info::GameInfo;
+use api::sr_libs::utils::card_templates::CardTemplate;
 use api::sr_libs::utils::card_templates::CardTemplate::*;
 use api::Upgrade::U3;
 use api::*;
@@ -99,3 +100,26 @@ pub const BOT_DECK: Deck = Deck {
         CardId::new(AshbonePyro, U3),
     ],
 };
+
+pub const BOT_CARDS: [CardTemplate; 20] = [
+    Dreadcharger,
+    Forsaken,
+    NoxTrooper,
+    Motivate,
+    NastySurprise,
+    LifeWeaving,
+    EnsnaringRoots,
+    Hurricane,
+    SurgeOfLight,
+    CurseofOink,
+    Tranquility,
+    AuraofCorruption,
+    DarkelfAssassins,
+    Nightcrawler,
+    AmiiPaladins,
+    AmiiPhantom,
+    Burrower,
+    ShadowPhoenix,
+    CultistMaster,
+    AshbonePyro,
+];
