@@ -431,12 +431,12 @@ impl MacroController {
             return;
         }
 
-        if game_info.seconds_have_passed(60) && game_info.bot.token_slots.len() == 1 {
+        if game_info.seconds_have_passed(180) && game_info.bot.token_slots.len() == 1 {
             self.enter_state(MacroState::AdvanceTier);
             return;
         }
 
-        if game_info.seconds_have_passed(120) && game_info.bot.token_slots.len() == 2 {
+        if game_info.seconds_have_passed(420) && game_info.bot.token_slots.len() == 2 {
             self.enter_state(MacroState::AdvanceTier);
             return;
         }
