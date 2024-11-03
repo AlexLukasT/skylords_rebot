@@ -1,16 +1,26 @@
 use api::sr_libs::utils::card_templates::CardTemplate;
 use api::sr_libs::utils::card_templates::CardTemplate::*;
+use api::sr_libs::utils::card_templates::CardType;
 use api::*;
 use log::*;
-use sr_libs::cff::card::Card;
 
+use crate::bot::BOT_CARDS;
+use crate::bot::BOT_DECK;
+use crate::card_data::*;
 use crate::command_scheduler::CommandScheduler;
 use crate::controller::squad_controller::SquadController;
 use crate::game_info::GameInfo;
-use crate::card_data::*;
+use crate::utils;
 
 // minimum difference in bound power to spawn a new squad when matching opponent's army size
 const MIN_POWER_DIFF_SPAWN: f32 = 50.;
+
+#[derive(PartialEq)]
+enum Tier {
+    Tier1,
+    Tier2,
+    Tier3,
+}
 
 #[derive(Debug)]
 pub struct SpawnController {
@@ -50,7 +60,7 @@ impl SpawnController {
 
         self.set_spawn_policy(game_info);
 
-        let next_card = self.get_next_card();
+        let next_card = self.get_next_card(game_info);
 
         let num_squads = game_info.bot.squads.keys().len();
 
@@ -141,6 +151,12 @@ impl SpawnController {
         if game_info.opponent.token_slots.len() == 1 && self.tier1_offense_spawn_policy.is_none() {
             let token_slots: Vec<&TokenSlot> = game_info.opponent.token_slots.values().collect();
             let orb_color = token_slots[0].color;
+
+            if orb_color == OrbColor::Starting {
+                // wait for the first real orb
+                return;
+            }
+
             info!("Setting T1 spawn policy to {orb_color:?}");
             self.tier1_offense_spawn_policy =
                 Some(SpawnController::get_tier1_offense_spawn_policy(orb_color));
@@ -150,42 +166,127 @@ impl SpawnController {
             let token_slots: Vec<&TokenSlot> = game_info.opponent.token_slots.values().collect();
             let orb_colors = (token_slots[0].color, token_slots[1].color);
             info!("Setting T2 spawn policy to {orb_colors:?}");
-            self.tier1_offense_spawn_policy =
-                Some(SpawnController::get_tier1_offense_spawn_policy(orb_colors));
+            self.tier2_offense_spawn_policy =
+                Some(SpawnController::get_tier2_offense_spawn_policy(orb_colors));
         }
     }
 
     pub fn set_in_offense(&mut self, in_offense: bool) {
+        if in_offense != self.in_offense {
+            info!("SpawnController setting offense to {in_offense:?}");
+        }
         self.in_offense = in_offense;
     }
 
-    fn get_next_card(&self, game_info: &GameInfo) -> CardTemplate {
-        let card_policy: Vec<CardTemplate>;
+    fn get_next_card(&self, game_info: &mut GameInfo) -> CardTemplate {
+        let card_policy: Option<Vec<CardTemplate>>;
         if game_info.bot.token_slots.len() == 2 {
             // try T2 first
             if self.in_offense {
                 // when in offense choose cards based on fixed policy
-                card_policy = self.tier2_offense_spawn_policy;
+                card_policy = self.tier2_offense_spawn_policy.clone();
             } else {
                 // when in defense choose cards based on enemy squads
-                card_policy = vec![];
+                card_policy = Some(self.get_defense_spawn_policy(game_info, Tier::Tier2));
             }
         } else {
             // T1
             if self.in_offense {
-                card_policy = self.tier1_offense_spawn_policy;
+                card_policy = self.tier1_offense_spawn_policy.clone();
             } else {
-                card_policy = vec![];
+                card_policy = Some(self.get_defense_spawn_policy(game_info, Tier::Tier1));
             }
+        }
+
+        if card_policy.is_none() {
+            return Dreadcharger;
+        }
+
+        let num_squads = game_info.bot.squads.len();
+        if num_squads < card_policy.clone().unwrap().len() {
+            // play the first cards in the policy first
+            card_policy.unwrap()[num_squads]
+        } else {
+            // infinitely repeat the last squad in the policy
+            *card_policy.unwrap().last().unwrap()
         }
     }
 
-    fn get_t1_defense_spawn_policy(&self, game_info: &GameInfo) {
+    fn get_defense_spawn_policy(&self, game_info: &mut GameInfo, tier: Tier) -> Vec<CardTemplate> {
         // choose defending units based on attacking ones
         let opponent_squads: Vec<&Squad> = game_info.opponent.squads.values().collect();
-        let squad_offense_types: Vec<CardOffenseType> = opponent_squads.iter().map(
-            |&s| CardId::
-        )
+        let squad_offense_types: Vec<CardOffenseType> = opponent_squads
+            .iter()
+            .map(|&s| {
+                game_info
+                    .card_data
+                    .get_card_info_from_id(s.card_id.0)
+                    .offense_type
+            })
+            .collect();
+        let most_common_offense_type = utils::most_frequent_element(squad_offense_types);
+
+        let squad_defense_types: Vec<CardDefenseType> = opponent_squads
+            .iter()
+            .map(|&s| {
+                game_info
+                    .card_data
+                    .get_card_info_from_id(s.card_id.0)
+                    .defense_type
+            })
+            .collect();
+        let most_common_defense_type = utils::most_frequent_element(squad_defense_types);
+
+        // TODO: figure this out dynamically
+        let defender_indices: Vec<usize> = match tier {
+            Tier::Tier1 => vec![0, 1, 2],
+            Tier::Tier2 => vec![12, 13, 14, 15],
+            Tier::Tier3 => vec![18, 19],
+        };
+
+        if most_common_offense_type.is_some() && most_common_defense_type.is_some() {
+            // best case: defender does not have matching defense type for attacker but
+            // it's offense type matches
+            for i in &defender_indices {
+                let card_id = BOT_DECK.cards[*i];
+                let defender = game_info.card_data.get_card_info_from_id(card_id.0);
+                if most_common_offense_type.unwrap().to_string()
+                    != defender.defense_type.to_string()
+                    && most_common_defense_type.unwrap().to_string()
+                        == defender.offense_type.to_string()
+                {
+                    return vec![BOT_CARDS[*i]];
+                }
+            }
+
+            // next best case: defender has correct offense type
+            for i in &defender_indices {
+                let card_id = BOT_DECK.cards[*i];
+                let defender = game_info.card_data.get_card_info_from_id(card_id.0);
+                if most_common_defense_type.unwrap().to_string()
+                    == defender.offense_type.to_string()
+                {
+                    return vec![BOT_CARDS[*i]];
+                }
+            }
+
+            // least best case: defender does not have matching defense type
+            for i in &defender_indices {
+                let card_id = BOT_DECK.cards[*i];
+                let defender = game_info.card_data.get_card_info_from_id(card_id.0);
+                if most_common_offense_type.unwrap().to_string()
+                    != defender.defense_type.to_string()
+                {
+                    return vec![BOT_CARDS[*i]];
+                }
+            }
+
+            // still no defender found -> return the first one
+            vec![BOT_CARDS[defender_indices[0]]]
+        } else {
+            warn!("Unable to find offense and defense type for opponent squads");
+            vec![BOT_CARDS[defender_indices[0]]]
+        }
     }
 
     fn get_tier1_offense_spawn_policy(opponent_color: OrbColor) -> Vec<CardTemplate> {

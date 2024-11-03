@@ -2,7 +2,6 @@ use api::sr_libs::utils::card_templates::CardTemplate;
 use api::*;
 use log::*;
 
-use crate::bot::BOT_DECK;
 use crate::card_data::CardData;
 use crate::game_info::GameInfo;
 
@@ -110,7 +109,12 @@ impl CommandScheduler {
             return false;
         }
 
-        self.current_power >= game_info.card_data.get_card_power_cost(&card)
+        let card_cost = game_info
+            .card_data
+            .get_card_info_from_name(card.name().to_string())
+            .power_cost;
+
+        self.current_power >= card_cost
     }
 
     pub fn power_slot_can_be_built(&self) -> bool {

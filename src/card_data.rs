@@ -13,7 +13,7 @@ const CARD_INFO_FILE_PATH: &'static str = "data/cards.json";
 
 pub struct CardData {
     data: serde_json::Value,
-    card_info_cache: BTreeMap<String, CardInfo>,
+    card_info_cache: BTreeMap<u32, CardInfo>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -45,11 +45,11 @@ pub enum CardDefenseType {
 
 #[derive(Debug, Clone, Copy)]
 pub struct CardInfo {
-    id: i32,
-    power_cost: f32,
-    orb_requirements: CardOrbRequirements,
-    offense_type: CardOffenseType,
-    defense_type: CardDefenseType,
+    pub id: i32,
+    pub power_cost: f32,
+    pub orb_requirements: CardOrbRequirements,
+    pub offense_type: CardOffenseType,
+    pub defense_type: CardDefenseType,
 }
 
 impl CardInfo {
@@ -69,6 +69,74 @@ impl CardInfo {
             defense_type: CardDefenseType::S,
         }
     }
+
+    pub fn from_card_json(card: &serde_json::Value) -> CardInfo {
+        CardInfo {
+            id: CardInfo::get_card_id(card),
+            power_cost: CardInfo::get_card_power_cost(card),
+            orb_requirements: CardInfo::get_card_orbs(card),
+            offense_type: CardInfo::get_card_offense_type(card),
+            defense_type: CardInfo::get_card_defense_type(card),
+        }
+    }
+
+    fn get_card_id(card: &serde_json::Value) -> i32 {
+        let ids = card["officialCardIds"].as_array().unwrap();
+
+        if ids.len() == 0 {
+            error!("Unable to find CardId for {card:?}");
+            0
+        } else if ids.len() > 1 {
+            warn!("Got more than one CardId for {card:?}");
+            0
+        } else {
+            ids.get(0).unwrap().as_i64().unwrap() as i32
+        }
+    }
+
+    fn get_card_power_cost(card: &serde_json::Value) -> f32 {
+        card["powerCost"].as_array().unwrap()[3].as_f64().unwrap() as f32
+    }
+
+    fn get_card_orbs(card: &serde_json::Value) -> CardOrbRequirements {
+        CardOrbRequirements {
+            total: card["orbsTotal"].as_i64().unwrap() as i32,
+            neutral: card["orbsNeutral"].as_i64().unwrap() as i32,
+            fire: card["orbsFire"].as_i64().unwrap() as i32,
+            shadow: card["orbsShadow"].as_i64().unwrap() as i32,
+            nature: card["orbsNature"].as_i64().unwrap() as i32,
+            frost: card["orbsFrost"].as_i64().unwrap() as i32,
+        }
+    }
+
+    fn get_card_offense_type(card: &serde_json::Value) -> CardOffenseType {
+        let index = card["offenseType"].as_i64().unwrap();
+        match index {
+            0 => CardOffenseType::S,
+            1 => CardOffenseType::M,
+            2 => CardOffenseType::L,
+            3 => CardOffenseType::XL,
+            4 => CardOffenseType::Special,
+            _ => {
+                error!("Unable to find CardOffenseType for index {index:?}");
+                CardOffenseType::S
+            }
+        }
+    }
+
+    fn get_card_defense_type(card: &serde_json::Value) -> CardDefenseType {
+        let index = card["defenseType"].as_i64().unwrap();
+        match index {
+            0 => CardDefenseType::S,
+            1 => CardDefenseType::M,
+            2 => CardDefenseType::L,
+            3 => CardDefenseType::XL,
+            _ => {
+                error!("Unable to find CardDefenseType for index {index:?}");
+                CardDefenseType::S
+            }
+        }
+    }
 }
 
 impl FromStr for CardOffenseType {
@@ -82,6 +150,18 @@ impl FromStr for CardOffenseType {
             "XL" => Ok(CardOffenseType::XL),
             "Special" => Ok(CardOffenseType::Special),
             _ => Err(()),
+        }
+    }
+}
+
+impl ToString for CardOffenseType {
+    fn to_string(&self) -> String {
+        match self {
+            CardOffenseType::S => "S".to_string(),
+            CardOffenseType::M => "M".to_string(),
+            CardOffenseType::L => "L".to_string(),
+            CardOffenseType::XL => "XL".to_string(),
+            CardOffenseType::Special => "Special".to_string(),
         }
     }
 }
@@ -100,6 +180,17 @@ impl FromStr for CardDefenseType {
     }
 }
 
+impl ToString for CardDefenseType {
+    fn to_string(&self) -> String {
+        match self {
+            CardDefenseType::S => "S".to_string(),
+            CardDefenseType::M => "M".to_string(),
+            CardDefenseType::L => "L".to_string(),
+            CardDefenseType::XL => "XL".to_string(),
+        }
+    }
+}
+
 impl CardData {
     pub fn new() -> Self {
         CardData {
@@ -108,56 +199,38 @@ impl CardData {
         }
     }
 
-    pub fn get_card_info_from_id(&self, card_id: i32) -> CardInfo {
-        let card_option = self.get_card_from_id(card_id);
-        if let Some(card) = card_option {
-            self.get_card_info_from_card(card)
-        } else {
-            CardInfo::new()
-        }
-    }
-
-    pub fn get_card_info_card_template(&self, card_template: &CardTemplate) -> CardInfo {
-        let name = card_template.name().to_lowercase().to_string();
-        self.get_card_info_from_name(name)
-    }
-
-    fn get_card_info_from_name(&mut self, name: String) -> CardInfo {
-        if let Some(card_info) = self.card_info_cache.get(&name) {
+    pub fn get_card_info_from_id(&mut self, card_id: u32) -> CardInfo {
+        if let Some(card_info) = self.card_info_cache.get(&card_id) {
             return *card_info;
         }
 
-        if let Some(card) = self.get_card_from_name(&name) {
-            let card_info = self.get_card_info_from_card(card);
-            self.card_info_cache.insert(name, card_info);
+        let card_option = self.get_card_from_id(card_id);
+        if let Some(card) = card_option {
+            let card_info = CardInfo::from_card_json(card);
+            self.card_info_cache.insert(card_id, card_info);
             card_info
         } else {
             CardInfo::new()
         }
     }
 
-    fn get_card_info_from_card(&self, card: &serde_json::Value) -> CardInfo {
-        CardInfo {
-            id: self.get_card_id(card),
-            power_cost: self.get_card_power_cost(card),
-            orb_requirements: self.get_card_orbs(card),
-            offense_type: self.get_card_offense_type(card),
-            defense_type: self.get_card_defense_type(card),
-        }
+    pub fn get_card_info_from_name(&mut self, name: String) -> CardInfo {
+        let card_id = self.get_card_id_from_name(&name);
+        self.get_card_info_from_id(card_id)
     }
 
-    pub fn card_id_without_upgrade(id: i32) -> i32 {
-        if id >= (Upgrade::U3 as i32) {
-            return id - (Upgrade::U3 as i32);
+    pub fn card_id_without_upgrade(id: u32) -> u32 {
+        if id >= (Upgrade::U3 as u32) {
+            return id - (Upgrade::U3 as u32);
         }
         id
     }
 
-    fn get_card_from_id(&self, card_id: i32) -> Option<&serde_json::Value> {
+    fn get_card_from_id(&self, card_id: u32) -> Option<&serde_json::Value> {
         for card in self.data["data"].as_array().unwrap() {
             let ids = card["officialCardIds"].as_array().unwrap();
             for id in ids {
-                if id.as_i64().unwrap() as i32 == CardData::card_id_without_upgrade(card_id) {
+                if id.as_i64().unwrap() as u32 == CardData::card_id_without_upgrade(card_id) {
                     return Some(card);
                 }
             }
@@ -167,15 +240,25 @@ impl CardData {
         None
     }
 
-    fn get_card_from_name(&self, name: &String) -> Option<&serde_json::Value> {
+    fn get_card_id_from_name(&self, name: &String) -> u32 {
         for card in self.data["data"].as_array().unwrap() {
-            if card["cardSlug"].as_str().unwrap().replace("-", "") == *name {
-                return Some(card);
+            if card["cardSlug"].as_str().unwrap().replace("-", "") == *name.to_lowercase() {
+                let ids = card["officialCardIds"].as_array().unwrap();
+
+                if ids.len() == 0 {
+                    error!("Unable to find CardId for {card:?}");
+                    return 0;
+                }
+                if ids.len() > 1 {
+                    warn!("Got more than one CardId for {card:?}");
+                    return 0;
+                }
+                return ids.get(0).unwrap().as_i64().unwrap() as u32;
             }
         }
 
         error!("Unable to find card {name:?} in card data");
-        None
+        0
     }
 
     pub fn load(&mut self) {
@@ -191,63 +274,14 @@ impl CardData {
         debug!("Finished loading card data");
     }
 
-    fn get_card_id(&self, card: &serde_json::Value) -> i32 {
-        let ids = card["officialCardIds"].as_array().unwrap();
-
-        if ids.len() == 0 {
-            error!("Unable to find CardId for {card:?}");
-            0
-        } else if ids.len() > 1 {
-            warn!("Got more than one CardId for {card:?}");
-            0
-        } else {
-            ids.get(0).unwrap().as_i64().unwrap() as i32
-        }
-    }
-
-    fn get_card_power_cost(&self, card: &serde_json::Value) -> f32 {
-        card["powerCost"].as_array().unwrap()[3].as_f64().unwrap() as f32
-    }
-
-    fn get_card_orbs(&self, card: &serde_json::Value) -> CardOrbRequirements {
-        CardOrbRequirements {
-            total: card["orbsTotal"].as_i64().unwrap() as i32,
-            neutral: card["orbsNeutral"].as_i64().unwrap() as i32,
-            fire: card["orbsFire"].as_i64().unwrap() as i32,
-            shadow: card["orbsShadow"].as_i64().unwrap() as i32,
-            nature: card["orbsNature"].as_i64().unwrap() as i32,
-            frost: card["orbsFrost"].as_i64().unwrap() as i32,
-        }
-    }
-
-    fn get_card_offense_type(&self, card: &serde_json::Value) -> CardOffenseType {
-        let offense_types = self.data.get("enums").unwrap().get("offenseType").unwrap();
-        let index = card["offenseType"].as_i64().unwrap();
-        let offense_type = offense_types
-            .get(index.to_string())
-            .unwrap()
-            .as_str()
-            .unwrap();
-        CardOffenseType::from_str(offense_type).unwrap()
-    }
-
-    fn get_card_defense_type(&self, card: &serde_json::Value) -> CardDefenseType {
-        let defense_types = self.data.get("enums").unwrap().get("defenseType").unwrap();
-        let index = card["defenseType"].as_i64().unwrap();
-        let defense_type = defense_types
-            .get(index.to_string())
-            .unwrap()
-            .as_str()
-            .unwrap();
-        CardDefenseType::from_str(defense_type).unwrap()
-    }
-
     pub fn player_fullfills_orb_requirements(
         &mut self,
         card_template: &CardTemplate,
         player_info: &PlayerInfo,
     ) -> bool {
-        let orb_requirements = self.get_card_info(card_template).orb_requirements;
+        let orb_requirements = self
+            .get_card_info_from_name(card_template.name().to_string())
+            .orb_requirements;
 
         // fire, shadow, nature, frost
         let mut num_colors: Vec<i32> = vec![0; 4];

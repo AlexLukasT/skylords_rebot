@@ -232,7 +232,7 @@ impl MacroController {
     }
 
     fn run_control_area(&mut self, game_info: &GameInfo) {
-        self.spawn_controller.set_in_offense(true);
+        self.spawn_controller.set_in_offense(false);
 
         let current_pos = self.combat_controller.get_spawn_location(game_info);
         let loc_pos = game_info.locations.get(&self.focus_loc).unwrap().position();

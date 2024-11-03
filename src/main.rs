@@ -31,7 +31,7 @@ async fn main() {
     let mut builder = Builder::new();
     // set logging for hyper::proto module to info so it doesn't clutter the debug log
     builder.filter_module("hyper::proto", LevelFilter::Info);
-    builder.filter_level(LevelFilter::Debug);
+    builder.filter_level(LevelFilter::Info);
     builder.init();
 
     let args = Args::parse();
