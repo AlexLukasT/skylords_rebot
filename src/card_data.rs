@@ -50,6 +50,8 @@ pub struct CardInfo {
     pub orb_requirements: CardOrbRequirements,
     pub offense_type: CardOffenseType,
     pub defense_type: CardDefenseType,
+    pub melee: bool,
+    pub siege: bool,
 }
 
 impl CardInfo {
@@ -67,6 +69,8 @@ impl CardInfo {
             },
             offense_type: CardOffenseType::S,
             defense_type: CardDefenseType::S,
+            melee: false,
+            siege: false,
         }
     }
 
@@ -77,6 +81,8 @@ impl CardInfo {
             orb_requirements: CardInfo::get_card_orbs(card),
             offense_type: CardInfo::get_card_offense_type(card),
             defense_type: CardInfo::get_card_defense_type(card),
+            melee: CardInfo::get_card_melee(card),
+            siege: CardInfo::get_card_siege(card),
         }
     }
 
@@ -134,6 +140,38 @@ impl CardInfo {
             _ => {
                 error!("Unable to find CardDefenseType for index {index:?}");
                 CardDefenseType::S
+            }
+        }
+    }
+
+    fn get_card_siege(card: &serde_json::Value) -> bool {
+        let card_name = card.get("cardSlug").unwrap().as_str().unwrap();
+        if card_name.to_lowercase() == "sunstriders" {
+            // Sunstriders also have an ability called "Siege", but it only adds a fixed
+            // 1 damage to it's attack. We only care about Siege multipliers (like Firedancer),
+            // so ignore this one.
+            return false;
+        }
+
+        for ability in card.get("abilities").unwrap().as_array().unwrap() {
+            let ability_name = ability.get("abilityName").unwrap().as_str().unwrap();
+            if ability_name == "Siege" {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    fn get_card_melee(card: &serde_json::Value) -> bool {
+        let attack_type = card.get("attackType").unwrap().as_str().unwrap();
+        match attack_type {
+            "0" => return true,
+            "1" => return false,
+            _ => {
+                let card_name = card.get("cardSlug").unwrap().as_str().unwrap();
+                error!("Unable to evaluate attack type {attack_type:?} for card {card_name:?}");
+                return true;
             }
         }
     }

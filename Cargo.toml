@@ -16,3 +16,4 @@ sr_libs = { rev = "5706e128", git = "https://gitlab.com/skylords-reborn/rust-lib
 
 serde_json = {version = "1.0.114"}
 chrono = "0.4.38"
+ordered-float = "4.5.0"

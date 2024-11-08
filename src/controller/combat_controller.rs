@@ -72,7 +72,7 @@ impl CombatController {
         }
     }
 
-    pub fn defend(&mut self, location: &Location, game_info: &GameInfo) {
+    pub fn defend(&mut self, location: &Location, game_info: &mut GameInfo) {
         if self.state != CombatControllerState::SlotDefense {
             self.enter_state(CombatControllerState::SlotDefense);
         }
@@ -93,12 +93,9 @@ impl CombatController {
                 squad.attack(&enemy_squads_in_range[0].entity.id);
             }
         } else {
-            // multiple enemies in range -> attack the one with the highest threat score
-            enemy_squads_in_range.sort_by(|s1, s2| {
-                let threat_score1 = utils::threat_score(&location_pos, s1, true);
-                let threat_score2 = utils::threat_score(&location_pos, s2, true);
-                // sort in descending order
-                threat_score2.partial_cmp(&threat_score1).unwrap()
+            // multiple enemies in range -> sort them ascending by threat scores
+            enemy_squads_in_range.sort_by_key(|squad| {
+                utils::threat_scores_defending(&location_pos, squad, game_info)
             });
 
             for squad in &mut self.squads {
@@ -112,7 +109,7 @@ impl CombatController {
         own_pos: &Position2D,
         center: &Position2D,
         radius: f32,
-        game_info: &GameInfo,
+        game_info: &mut GameInfo,
     ) {
         if self.state != CombatControllerState::AreaControl {
             self.enter_state(CombatControllerState::AreaControl);
@@ -136,13 +133,8 @@ impl CombatController {
             return;
         }
 
-        // multiple enemy squads in range -> attack the one with the highest threat score
-        enemy_squads.sort_by(|s1, s2| {
-            let threat_score1 = utils::threat_score(own_pos, s1, false);
-            let threat_score2 = utils::threat_score(own_pos, s2, false);
-            // sort in descending order
-            threat_score2.partial_cmp(&threat_score1).unwrap()
-        });
+        // multiple enemy squads in range -> sort them ascending by threat scores
+        enemy_squads.sort_by_key(|squad| utils::threat_scores_attacking(own_pos, squad, game_info));
 
         for squad in &mut self.squads {
             squad.attack(&enemy_squads[0].entity.id);
@@ -181,7 +173,7 @@ impl CombatController {
         }
     }
 
-    pub fn attack_slot_control(&mut self, entity_id: &EntityId, game_info: &GameInfo) {
+    pub fn attack_slot_control(&mut self, entity_id: &EntityId, game_info: &mut GameInfo) {
         // attack an enemy slot, but focus enemy squads first
         if !self.slot_is_valid_target(entity_id, game_info) {
             warn!("Can not attack {:?} with slot control", entity_id);
@@ -227,12 +219,9 @@ impl CombatController {
                 squad.attack(&enemy_squads_in_range[0].entity.id);
             }
         } else {
-            // multiple enemy squads in range -> attack the one with the highest threat score
-            enemy_squads_in_range.sort_by(|s1, s2| {
-                let threat_score1 = utils::threat_score(&slot_position, s1, false);
-                let threat_score2 = utils::threat_score(&slot_position, s2, false);
-                // sort in descending order
-                threat_score2.partial_cmp(&threat_score1).unwrap()
+            // multiple enemy squads in range -> sort them ascending by threat scores
+            enemy_squads_in_range.sort_by_key(|squad| {
+                utils::threat_scores_attacking(&slot_position, squad, game_info)
             });
 
             for squad in &mut self.squads {

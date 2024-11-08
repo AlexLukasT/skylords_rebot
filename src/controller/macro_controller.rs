@@ -331,7 +331,7 @@ impl MacroController {
         }
     }
 
-    fn run_control_area(&mut self, game_info: &GameInfo) {
+    fn run_control_area(&mut self, game_info: &mut GameInfo) {
         self.spawn_controller.set_in_offense(false);
 
         let current_pos = self
@@ -371,7 +371,7 @@ impl MacroController {
         );
     }
 
-    fn run_attack_loc(&mut self, game_info: &GameInfo) {
+    fn run_attack_loc(&mut self, game_info: &mut GameInfo) {
         self.spawn_controller.set_in_offense(true);
 
         if location::get_location_owner(&self.attack_focus_loc, game_info).is_none() {
@@ -428,7 +428,7 @@ impl MacroController {
         }
     }
 
-    fn run_defend(&mut self, game_info: &GameInfo) {
+    fn run_defend(&mut self, game_info: &mut GameInfo) {
         self.spawn_controller.set_in_offense(false);
 
         if game_info.token_slot_diff() < 0 {
