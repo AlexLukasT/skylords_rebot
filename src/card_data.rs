@@ -45,7 +45,7 @@ pub enum CardDefenseType {
 
 #[derive(Debug, Clone, Copy)]
 pub struct CardInfo {
-    pub id: i32,
+    pub id: u32,
     pub power_cost: f32,
     pub orb_requirements: CardOrbRequirements,
     pub offense_type: CardOffenseType,
@@ -86,7 +86,7 @@ impl CardInfo {
         }
     }
 
-    fn get_card_id(card: &serde_json::Value) -> i32 {
+    fn get_card_id(card: &serde_json::Value) -> u32 {
         let ids = card["officialCardIds"].as_array().unwrap();
 
         if ids.len() == 0 {
@@ -96,7 +96,7 @@ impl CardInfo {
             warn!("Got more than one CardId for {card:?}");
             0
         } else {
-            ids.get(0).unwrap().as_i64().unwrap() as i32
+            ids.get(0).unwrap().as_i64().unwrap() as u32
         }
     }
 

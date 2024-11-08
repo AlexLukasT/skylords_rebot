@@ -1,6 +1,5 @@
 use api::sr_libs::utils::card_templates::CardTemplate;
 use api::sr_libs::utils::card_templates::CardTemplate::*;
-use api::sr_libs::utils::card_templates::CardType;
 use api::*;
 use log::*;
 
@@ -258,56 +257,43 @@ impl SpawnController {
 
     fn get_defense_spawn_policy(&self, game_info: &mut GameInfo, tier: Tier) -> Vec<CardTemplate> {
         // choose defending units based on attacking ones
-        let opponent_squads: Vec<&Squad> = game_info.opponent.squads.values().collect();
-        let squad_offense_types: Vec<CardOffenseType> = opponent_squads
-            .iter()
-            .map(|&s| {
-                game_info
-                    .card_data
-                    .get_card_info_from_id(s.card_id.0)
-                    .offense_type
-            })
-            .collect();
-        let most_common_offense_type = utils::most_frequent_element(squad_offense_types);
-
-        let squad_defense_types: Vec<CardDefenseType> = opponent_squads
-            .iter()
-            .map(|&s| {
-                game_info
-                    .card_data
-                    .get_card_info_from_id(s.card_id.0)
-                    .defense_type
-            })
-            .collect();
-        let most_common_defense_type = utils::most_frequent_element(squad_defense_types);
-
         let defender_indices: Vec<usize> = match tier {
             Tier::Tier1 => BOT_T1_UNITS.to_vec(),
             Tier::Tier2 => BOT_T2_UNITS.to_vec(),
             Tier::Tier3 => BOT_T3_UNITS.to_vec(),
         };
 
-        if most_common_offense_type.is_some() && most_common_defense_type.is_some() {
+        let opponent_squads: Vec<&Squad> = game_info.opponent.squads.values().collect();
+        let squad_ids: Vec<u32> = opponent_squads
+            .iter()
+            .map(|&s| game_info.card_data.get_card_info_from_id(s.card_id.0).id)
+            .collect();
+        let most_common_squad_id = utils::most_frequent_element(squad_ids);
+
+        if let Some(squad_id) = most_common_squad_id {
+            let attacker = game_info.card_data.get_card_info_from_id(squad_id);
+
             // best case: defender does not have matching defense type for attacker but
             // it's offense type matches
             for i in &defender_indices {
                 let card_id = BOT_DECK.cards[*i];
                 let defender = game_info.card_data.get_card_info_from_id(card_id.0);
-                if most_common_offense_type.unwrap().to_string()
-                    != defender.defense_type.to_string()
-                    && most_common_defense_type.unwrap().to_string()
-                        == defender.offense_type.to_string()
+                if attacker.offense_type.to_string() != defender.defense_type.to_string()
+                    && attacker.defense_type.to_string() == defender.offense_type.to_string()
                 {
                     return vec![BOT_CARDS[*i]];
                 }
             }
 
-            // next best case: defender has correct offense type
+            // next best case: defender has correct offense type, but not when attacker is
+            // ranged and defender is melee (e.g. do not defend Sunstriders with Dreadcharger)
             for i in &defender_indices {
                 let card_id = BOT_DECK.cards[*i];
                 let defender = game_info.card_data.get_card_info_from_id(card_id.0);
-                if most_common_defense_type.unwrap().to_string()
-                    == defender.offense_type.to_string()
+                if attacker.defense_type.to_string() == defender.offense_type.to_string()
+                    && !(!attacker.melee
+                        && defender.melee
+                        && attacker.offense_type.to_string() == defender.offense_type.to_string())
                 {
                     return vec![BOT_CARDS[*i]];
                 }
@@ -317,9 +303,7 @@ impl SpawnController {
             for i in &defender_indices {
                 let card_id = BOT_DECK.cards[*i];
                 let defender = game_info.card_data.get_card_info_from_id(card_id.0);
-                if most_common_offense_type.unwrap().to_string()
-                    != defender.defense_type.to_string()
-                {
+                if attacker.offense_type.to_string() != defender.defense_type.to_string() {
                     return vec![BOT_CARDS[*i]];
                 }
             }
@@ -327,7 +311,8 @@ impl SpawnController {
             // still no defender found -> return the first one
             vec![BOT_CARDS[defender_indices[0]]]
         } else {
-            vec![BOT_CARDS[defender_indices[0]]]
+            warn!("Unable to find the most common attacker squad");
+            return vec![BOT_CARDS[defender_indices[0]]];
         }
     }
 
