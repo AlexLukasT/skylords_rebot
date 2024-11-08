@@ -309,6 +309,11 @@ impl MacroController {
 
     fn run_heal_units(&mut self, game_info: &GameInfo) {
         self.spawn_controller.set_in_offense(false);
+
+        if self.get_locations_under_attack(game_info).len() > 0 {
+            self.enter_state(MacroState::Defend);
+        }
+
         let pos = game_info
             .locations
             .get(&self.latest_owning_loc)
@@ -465,33 +470,7 @@ impl MacroController {
             self.enter_state(MacroState::GroundPresenceNextLoc);
         }
 
-        let location_prios;
-        if game_info.bot.start_location == Location::South {
-            location_prios = LOCATION_PRIOS_AHEAD_SOUTH_START;
-        } else if game_info.bot.start_location == Location::North {
-            location_prios = LOCATION_PRIOS_AHEAD_NORTH_START;
-        } else {
-            error!("Unable to find prio locations based on start location, using south");
-            location_prios = LOCATION_PRIOS_AHEAD_SOUTH_START;
-        }
-
-        let owned_locations: Vec<Location> = location_prios
-            .clone()
-            .into_iter()
-            .filter(|loc| {
-                location::get_location_owner(loc, game_info)
-                    .is_some_and(|id| id == game_info.bot.id)
-            })
-            .collect();
-        let locations_under_attack: Vec<Location> = owned_locations
-            .into_iter()
-            .filter(|loc| {
-                let loc_pos = game_info.locations.get(loc).unwrap().position();
-                let enemies_in_range =
-                    game_info.get_enemy_squads_in_range(&loc_pos, DEFEND_LOCATION_AGGRO_RADIUS);
-                enemies_in_range.len() > 0
-            })
-            .collect();
+        let locations_under_attack = self.get_locations_under_attack(game_info);
 
         let loc_to_defend: Location;
         if locations_under_attack.len() == 0 {
@@ -621,5 +600,36 @@ impl MacroController {
             info!("MacroController: controlling location {:?}", new_loc);
             self.latest_owning_loc = new_loc;
         }
+    }
+
+    fn get_locations_under_attack(&self, game_info: &GameInfo) -> Vec<Location> {
+        let location_prios;
+        if game_info.bot.start_location == Location::South {
+            location_prios = LOCATION_PRIOS_AHEAD_SOUTH_START;
+        } else if game_info.bot.start_location == Location::North {
+            location_prios = LOCATION_PRIOS_AHEAD_NORTH_START;
+        } else {
+            error!("Unable to find prio locations based on start location, using south");
+            location_prios = LOCATION_PRIOS_AHEAD_SOUTH_START;
+        }
+
+        let owned_locations: Vec<Location> = location_prios
+            .clone()
+            .into_iter()
+            .filter(|loc| {
+                location::get_location_owner(loc, game_info)
+                    .is_some_and(|id| id == game_info.bot.id)
+            })
+            .collect();
+        let locations_under_attack: Vec<Location> = owned_locations
+            .into_iter()
+            .filter(|loc| {
+                let loc_pos = game_info.locations.get(loc).unwrap().position();
+                let enemies_in_range =
+                    game_info.get_enemy_squads_in_range(&loc_pos, DEFEND_LOCATION_AGGRO_RADIUS);
+                enemies_in_range.len() > 0
+            })
+            .collect();
+        locations_under_attack
     }
 }
