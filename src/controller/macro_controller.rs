@@ -22,57 +22,57 @@ const MIN_TEMPO_DIFF_ADVANTAGE: f32 = 0.;
 const DEFEND_LOCATION_AGGRO_RADIUS: f32 = 30.;
 
 // locations to prioritize when ahead or even
-const LOCATION_PRIOS_AHEAD_SOUTH_START: [Location; 11] = [
+const LOCATION_PRIOS_AHEAD_SOUTH_START: [Location; 9] = [
     Location::South,
     Location::Center,
     Location::Centersouth,
     Location::Centernorth,
     Location::Southeast,
-    Location::Southwest,
+    // Location::Southwest,
     Location::East,
     Location::West,
     Location::Northwest,
-    Location::Northeast,
+    // Location::Northeast,
     Location::North,
 ];
-const LOCATION_PRIOS_AHEAD_NORTH_START: [Location; 11] = [
+const LOCATION_PRIOS_AHEAD_NORTH_START: [Location; 9] = [
     Location::North,
     Location::Center,
     Location::Centernorth,
     Location::Centersouth,
     Location::Northwest,
-    Location::Northeast,
+    // Location::Northeast,
     Location::West,
     Location::East,
     Location::Southeast,
-    Location::Southwest,
+    // Location::Southwest,
     Location::South,
 ];
 
 // locations to prioritize when behind
-const LOCATION_PRIOS_BEHIND_SOUTH_START: [Location; 11] = [
+const LOCATION_PRIOS_BEHIND_SOUTH_START: [Location; 9] = [
     Location::South,
     Location::Southeast,
     Location::East,
-    Location::Southwest,
+    // Location::Southwest,
     Location::West,
     Location::Centersouth,
     Location::Center,
     Location::Centernorth,
     Location::Northwest,
-    Location::Northeast,
+    // Location::Northeast,
     Location::North,
 ];
-const LOCATION_PRIOS_BEHIND_NORTH_START: [Location; 11] = [
+const LOCATION_PRIOS_BEHIND_NORTH_START: [Location; 9] = [
     Location::North,
-    Location::Northwest,
+    // Location::Northwest,
     Location::West,
     Location::Northeast,
     Location::East,
     Location::Centernorth,
     Location::Center,
     Location::Centersouth,
-    Location::Southeast,
+    // Location::Southeast,
     Location::Southwest,
     Location::South,
 ];
@@ -396,6 +396,13 @@ impl MacroController {
             return;
         }
 
+        if (game_info.bot.squads.len() as i64) - (game_info.opponent.squads.len() as i64) < -1 {
+            // opponent has 2 or more squads more than me -> fight is lost, retreat
+            self.spawn_controller.stop_spawn();
+            self.enter_state(MacroState::HealUnits);
+            return;
+        }
+
         self.spawn_controller.spawn_on_limit();
 
         let mut target: Option<EntityId> = None;
@@ -422,8 +429,14 @@ impl MacroController {
         }
 
         if target.is_some() {
-            self.combat_controller
-                .attack_slot_control(&target.unwrap(), game_info);
+            if game_info.bot.squads.len() >= 5 {
+                // 5 squads or more attacking -> focus the well/orb
+                self.combat_controller
+                    .attack_slot_focus(&target.unwrap(), game_info);
+            } else {
+                self.combat_controller
+                    .attack_slot_control(&target.unwrap(), game_info);
+            }
         } else {
             // neither one of the power wells nor the orb is taken, something is wrong
             error!(
@@ -515,7 +528,7 @@ impl MacroController {
             }
 
             // find the next location owned by the opponent if tempo is good
-            for loc in location_prios_ahead[..9].iter() {
+            for loc in location_prios_ahead[..(location_prios_ahead.len() - 1)].iter() {
                 if let Some(owner_id) = location::get_location_owner(&loc, game_info) {
                     if owner_id == game_info.opponent.id {
                         // location is owned by the opponent
@@ -527,7 +540,7 @@ impl MacroController {
             // TODO: implement this properly
             if game_info.seconds_have_passed(300) {
                 // hacky: allow targetting enemy base after 5 mins
-                return Location::North;
+                return location_prios_ahead[location_prios_ahead.len() - 1];
             }
 
             // find the location not owned by anyone
