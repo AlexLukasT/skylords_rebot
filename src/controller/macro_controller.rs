@@ -442,12 +442,18 @@ impl MacroController {
             return;
         }
 
-        if game_info.seconds_have_passed(180) && game_info.bot.token_slots.len() == 1 {
+        if game_info.seconds_have_passed(180)
+            && game_info.bot.token_slots.len() == 1
+            && game_info.bot.power >= 200.
+        {
             self.enter_state(MacroState::AdvanceTier);
             return;
         }
 
-        if game_info.seconds_have_passed(420) && game_info.bot.token_slots.len() == 2 {
+        if game_info.seconds_have_passed(420)
+            && game_info.bot.token_slots.len() == 2
+            && game_info.bot.power >= 300.
+        {
             self.enter_state(MacroState::AdvanceTier);
             return;
         }
@@ -464,9 +470,13 @@ impl MacroController {
             return;
         }
 
-        if game_info.bot.token_slots.len() == 2 && game_info.bot.power >= 300. {
-            // I'm T3 and have a lot of energy, the opponent most likely bunkered in his base ->
-            // just attack
+        if game_info.bot.power >= 300. {
+            // lots of unspent power -> build a well or attack
+            if game_info.bot.power_slots.len() < 7 {
+                self.enter_state(MacroState::TakeWell);
+                return;
+            }
+
             self.enter_state(MacroState::GroundPresenceNextLoc);
         }
 
