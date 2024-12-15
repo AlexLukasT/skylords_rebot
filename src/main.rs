@@ -29,7 +29,7 @@ enum BotImplementations {
 
 #[tokio::main]
 async fn main() {
-    let file_name = chrono::Local::now().format("%Y-%m-%d_%H:%M:%S").to_string() + ".log";
+    let file_name = dbg!(chrono::Local::now().format("%Y-%m-%d_%H_%M_%S").to_string() + ".log");
     let log_file = Box::new(File::create(file_name).expect("Can't create log file"));
     let mut builder = Builder::new();
     // set logging for hyper::proto module to info so it doesn't clutter the debug log

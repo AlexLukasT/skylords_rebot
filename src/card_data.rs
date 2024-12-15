@@ -274,14 +274,10 @@ impl CardData {
     }
 
     pub fn load(&mut self) {
-        let root_dir = path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let full_path = root_dir.join(CARD_INFO_FILE_PATH);
-        debug!("Loading card data from {full_path:?}");
+        debug!("Loading card data");
 
-        let file = fs::File::open(full_path).expect("Unable to open cards.json file");
-        let json: serde_json::Value =
-            serde_json::from_reader(file).expect("Unable to parse cards.json file");
-        self.data = json;
+        self.data = serde_json::from_str(include_str!("../data/cards.json"))
+            .expect("Unable to parse cards.json file");
 
         debug!("Finished loading card data");
     }
