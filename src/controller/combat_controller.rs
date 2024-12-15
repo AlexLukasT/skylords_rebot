@@ -99,7 +99,9 @@ impl CombatController {
             });
 
             for squad in &mut self.squads {
-                squad.attack(&enemy_squads_in_range[0].entity.id);
+                let entity_id = enemy_squads_in_range[0].entity.id;
+                debug!("Defend: focusing attack on {:?}", entity_id);
+                squad.attack(&entity_id);
             }
         }
     }
@@ -137,7 +139,9 @@ impl CombatController {
         enemy_squads.sort_by_key(|squad| utils::threat_scores_attacking(own_pos, squad, game_info));
 
         for squad in &mut self.squads {
-            squad.attack(&enemy_squads[0].entity.id);
+            let entity_id = enemy_squads[0].entity.id;
+            debug!("Control area: focussing attack on {:?}", entity_id);
+            squad.attack(&entity_id);
         }
     }
 
@@ -225,6 +229,8 @@ impl CombatController {
             });
 
             for squad in &mut self.squads {
+                let entity_id = enemy_squads_in_range[0].entity.id;
+                debug!("Attack control: focussing attack on {:?}", entity_id);
                 squad.attack(&enemy_squads_in_range[0].entity.id);
             }
         }

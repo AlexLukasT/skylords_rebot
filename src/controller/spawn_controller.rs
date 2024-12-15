@@ -293,7 +293,7 @@ impl SpawnController {
                 if attacker.defense_type.to_string() == defender.offense_type.to_string()
                     && !(!attacker.melee
                         && defender.melee
-                        && attacker.offense_type.to_string() == defender.offense_type.to_string())
+                        && attacker.offense_type.to_string() == defender.defense_type.to_string())
                 {
                     return vec![BOT_CARDS[*i]];
                 }

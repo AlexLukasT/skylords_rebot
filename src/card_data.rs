@@ -150,7 +150,7 @@ impl CardInfo {
             // Sunstriders also have an ability called "Siege", but it only adds a fixed
             // 1 damage to it's attack. We only care about Siege multipliers (like Firedancer),
             // so ignore this one.
-            return false;
+            return true;
         }
 
         for ability in card.get("abilities").unwrap().as_array().unwrap() {
@@ -164,10 +164,10 @@ impl CardInfo {
     }
 
     fn get_card_melee(card: &serde_json::Value) -> bool {
-        let attack_type = card.get("attackType").unwrap().as_str().unwrap();
+        let attack_type = card.get("attackType").unwrap().as_i64().unwrap();
         match attack_type {
-            "0" => return true,
-            "1" => return false,
+            0 => return true,
+            1 => return false,
             _ => {
                 let card_name = card.get("cardSlug").unwrap().as_str().unwrap();
                 error!("Unable to evaluate attack type {attack_type:?} for card {card_name:?}");
