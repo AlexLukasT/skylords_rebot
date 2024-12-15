@@ -436,58 +436,61 @@ impl MacroController {
     fn run_defend(&mut self, game_info: &mut GameInfo) {
         self.spawn_controller.set_in_offense(false);
 
-        if game_info.token_slot_diff() < 0 {
-            // opponent is a tier ahead -> build next orb
-            self.enter_state(MacroState::AdvanceTier);
-            return;
-        }
+        let locations_under_attack = self.get_locations_under_attack(game_info);
 
-        if game_info.seconds_have_passed(180)
-            && game_info.bot.token_slots.len() == 1
-            && game_info.bot.power >= 200.
-        {
-            self.enter_state(MacroState::AdvanceTier);
-            return;
-        }
+        if locations_under_attack.len() == 0 {
+            // don't spawn any new units when the opponent is not attacking a location
+            self.spawn_controller.stop_spawn();
 
-        if game_info.seconds_have_passed(420)
-            && game_info.bot.token_slots.len() == 2
-            && game_info.bot.power >= 300.
-        {
-            self.enter_state(MacroState::AdvanceTier);
-            return;
-        }
+            if game_info.token_slot_diff() < 0 {
+                // opponent is a tier ahead -> build next orb
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
 
-        if game_info.power_slot_diff() < 0 {
-            // opponent has more power slots -> build another one
-            self.enter_state(MacroState::TakeWell);
-            return;
-        }
+            if game_info.seconds_have_passed(180)
+                && game_info.bot.token_slots.len() == 1
+                && game_info.bot.power >= 200.
+            {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
 
-        if MacroController::tempo_advantage(game_info) {
-            // tempo advantage -> move towards next location
-            self.enter_state(MacroState::GroundPresenceNextLoc);
-            return;
-        }
+            if game_info.seconds_have_passed(420)
+                && game_info.bot.token_slots.len() == 2
+                && game_info.bot.power >= 300.
+            {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
 
-        if game_info.bot.power >= 300. {
-            // lots of unspent power -> build a well or attack
-            if game_info.bot.power_slots.len() < 7 {
+            if game_info.power_slot_diff() < 0 {
+                // opponent has more power slots -> build another one
                 self.enter_state(MacroState::TakeWell);
                 return;
             }
 
-            self.enter_state(MacroState::GroundPresenceNextLoc);
-        }
+            if MacroController::tempo_advantage(game_info) {
+                // tempo advantage -> move towards next location
+                self.enter_state(MacroState::GroundPresenceNextLoc);
+                return;
+            }
 
-        let locations_under_attack = self.get_locations_under_attack(game_info);
+            if game_info.bot.power >= 300. {
+                // lots of unspent power -> build a well or attack
+                if game_info.bot.power_slots.len() < 7 {
+                    self.enter_state(MacroState::TakeWell);
+                    return;
+                }
 
-        let loc_to_defend: Location;
-        if locations_under_attack.len() == 0 {
-            // don't spawn any new units when the opponent is not attacking a location
-            self.spawn_controller.stop_spawn();
+                self.enter_state(MacroState::GroundPresenceNextLoc);
+                return;
+            }
+
             return;
         }
+
+        let loc_to_defend: Location;
         if locations_under_attack.len() == 1 {
             loc_to_defend = *locations_under_attack.first().unwrap();
         } else {
