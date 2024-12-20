@@ -368,7 +368,32 @@ impl MacroController {
             game_info.get_enemy_squads_in_range(&loc_pos, CONTROL_AREA_AGGRO_RADIUS);
         if enemy_squads_in_range.len() == 0 {
             // no more enemy squads in range -> take location
-            self.enter_state(MacroState::GroundPresenceNextLoc);
+            self.spawn_controller.stop_spawn();
+
+            if game_info.token_slot_diff() < 0 {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
+
+            if game_info.seconds_have_passed(180) && game_info.bot.token_slots.len() == 1 {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
+
+            if game_info.seconds_have_passed(420) && game_info.bot.token_slots.len() == 2 {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
+
+            if game_info.power_slot_diff() < 0
+                || game_info.bot.power > MIN_POWER_BUILD_WELL
+                || game_info.bot.squads.len() >= 3
+            {
+                // opponent has one or more wells, bot has enough power to defend an attack or has
+                // enough squads to defend a possible retaliation attack
+                self.enter_state(MacroState::TakeWell);
+                return;
+            }
             return;
         }
 
