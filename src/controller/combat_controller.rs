@@ -140,7 +140,6 @@ impl CombatController {
 
         for squad in &mut self.squads {
             let entity_id = enemy_squads[0].entity.id;
-            debug!("Control area: focussing attack on {:?}", entity_id);
             squad.attack(&entity_id, false);
         }
     }
@@ -229,7 +228,6 @@ impl CombatController {
 
             for squad in &mut self.squads {
                 let entity_id = enemy_squads_in_range[0].entity.id;
-                debug!("Attack control: focussing attack on {:?}", entity_id);
                 squad.attack(&enemy_squads_in_range[0].entity.id, false);
             }
         }
