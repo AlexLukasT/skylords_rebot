@@ -104,7 +104,7 @@ impl SquadController {
         }
     }
 
-    pub fn attack(&mut self, target: &EntityId) {
+    pub fn attack(&mut self, target: &EntityId, force: bool) {
         let new_target_provided: bool;
         if let Some(cur_target) = self.current_target {
             if *target == cur_target {
@@ -124,7 +124,7 @@ impl SquadController {
             self.commands.push(Command::GroupAttack {
                 squads: vec![self.entity_id],
                 target_entity_id: *target,
-                force_attack: false,
+                force_attack: force,
             });
             self.current_target = Some(*target);
             self.enter_state(SquadControllerState::Attacking);

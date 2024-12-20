@@ -20,6 +20,8 @@ const MIN_POWER_BUILD_WELL: f32 = 200.;
 const MIN_TEMPO_DIFF_ADVANTAGE: f32 = 0.;
 // radius in which a location is considered under attack by enemy units
 const DEFEND_LOCATION_AGGRO_RADIUS: f32 = 30.;
+// difference in number of squads to focus a well or orb instead of enemy squads
+const NUM_SQUADS_CRITICAL_MASS: i32 = 6;
 
 // locations to prioritize when ahead or even
 const LOCATION_PRIOS_AHEAD_SOUTH_START: [Location; 11] = [
@@ -399,6 +401,7 @@ impl MacroController {
         self.spawn_controller.spawn_on_limit();
 
         let mut target: Option<EntityId> = None;
+        let mut pos: Option<Position2D> = None;
         let loc = game_info.locations.get(&self.attack_focus_loc).unwrap();
 
         // attack power slots first
@@ -409,6 +412,16 @@ impl MacroController {
                 .contains_key(&power_slot.entity_id.unwrap())
             {
                 target = power_slot.entity_id;
+                pos = Some(
+                    game_info
+                        .opponent
+                        .power_slots
+                        .get(&target.unwrap())
+                        .unwrap()
+                        .entity
+                        .position
+                        .to_2d(),
+                );
             }
         }
 
@@ -416,14 +429,37 @@ impl MacroController {
         if target.is_none() {
             if let Some(token) = loc.token {
                 target = token.entity_id;
+                pos = Some(
+                    game_info
+                        .opponent
+                        .token_slots
+                        .get(&target.unwrap())
+                        .unwrap()
+                        .entity
+                        .position
+                        .to_2d(),
+                );
             } else {
                 warn!("Can not find slot token to attack");
             }
         }
 
         if target.is_some() {
-            self.combat_controller
-                .attack_slot_control(&target.unwrap(), game_info);
+            let num_enemy_squads_in_range = game_info
+                .get_enemy_squads_in_range(&pos.unwrap(), CONTROL_AREA_AGGRO_RADIUS)
+                .len() as i32;
+
+            if (game_info.bot.squads.len() as i32) - num_enemy_squads_in_range
+                >= NUM_SQUADS_CRITICAL_MASS
+            {
+                // reached a critical mass of own squads -> focus the well or orb
+                self.combat_controller
+                    .attack_slot_focus(&target.unwrap(), game_info);
+            } else {
+                // focus enemy squads first
+                self.combat_controller
+                    .attack_slot_control(&target.unwrap(), game_info);
+            }
         } else {
             // neither one of the power wells nor the orb is taken, something is wrong
             error!(

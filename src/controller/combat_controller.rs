@@ -90,7 +90,7 @@ impl CombatController {
         } else if enemy_squads_in_range.len() == 1 {
             // one enemy in range -> attack that one
             for squad in &mut self.squads {
-                squad.attack(&enemy_squads_in_range[0].entity.id);
+                squad.attack(&enemy_squads_in_range[0].entity.id, false);
             }
         } else {
             // multiple enemies in range -> sort them ascending by threat scores
@@ -101,7 +101,7 @@ impl CombatController {
             for squad in &mut self.squads {
                 let entity_id = enemy_squads_in_range[0].entity.id;
                 debug!("Defend: focusing attack on {:?}", entity_id);
-                squad.attack(&entity_id);
+                squad.attack(&entity_id, false);
             }
         }
     }
@@ -141,7 +141,7 @@ impl CombatController {
         for squad in &mut self.squads {
             let entity_id = enemy_squads[0].entity.id;
             debug!("Control area: focussing attack on {:?}", entity_id);
-            squad.attack(&entity_id);
+            squad.attack(&entity_id, false);
         }
     }
 
@@ -157,7 +157,7 @@ impl CombatController {
         }
 
         for squad in &mut self.squads {
-            squad.attack(entity_id);
+            squad.attack(entity_id, true);
         }
     }
 
@@ -173,7 +173,7 @@ impl CombatController {
         }
 
         for squad in &mut self.squads {
-            squad.attack(entity_id);
+            squad.attack(entity_id, true);
         }
     }
 
@@ -188,7 +188,6 @@ impl CombatController {
             self.enter_state(CombatControllerState::AttackSlotControl);
         }
 
-        // ToDo: attack enemy squad based on threat score or slot
         let slot_position: Position2D;
         if game_info.opponent.power_slots.contains_key(&entity_id) {
             slot_position = game_info
@@ -215,12 +214,12 @@ impl CombatController {
         if enemy_squads_in_range.len() == 0 {
             // no enemy squads in range -> attack slot directly
             for squad in &mut self.squads {
-                squad.attack(&entity_id);
+                squad.attack(&entity_id, false);
             }
         } else if enemy_squads_in_range.len() == 1 {
             // exactly one enemy squad in range -> attack it
             for squad in &mut self.squads {
-                squad.attack(&enemy_squads_in_range[0].entity.id);
+                squad.attack(&enemy_squads_in_range[0].entity.id, false);
             }
         } else {
             // multiple enemy squads in range -> sort them ascending by threat scores
@@ -231,7 +230,7 @@ impl CombatController {
             for squad in &mut self.squads {
                 let entity_id = enemy_squads_in_range[0].entity.id;
                 debug!("Attack control: focussing attack on {:?}", entity_id);
-                squad.attack(&enemy_squads_in_range[0].entity.id);
+                squad.attack(&enemy_squads_in_range[0].entity.id, false);
             }
         }
     }
