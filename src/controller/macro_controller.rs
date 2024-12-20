@@ -96,6 +96,7 @@ pub struct MacroController {
     state: MacroState,
     attack_focus_loc: Location,
     latest_owning_loc: Location,
+    owning_loc_history: Vec<Location>,
     pub combat_controller: CombatController,
     pub spawn_controller: SpawnController,
 }
@@ -106,6 +107,7 @@ impl MacroController {
             state: MacroState::MatchStart,
             attack_focus_loc: Location::Center,
             latest_owning_loc: Location::Center,
+            owning_loc_history: vec![],
             combat_controller: CombatController::new(vec![]),
             spawn_controller: SpawnController::new(),
         }
@@ -119,6 +121,7 @@ impl MacroController {
 
         self.combat_controller
             .remove_dead_and_errored_squads(game_info);
+        self.handle_destroyed_slots(game_info);
         let current_pos = self
             .combat_controller
             .get_spawn_location(game_info, &self.latest_owning_loc);
@@ -648,6 +651,10 @@ impl MacroController {
         if new_loc != self.latest_owning_loc {
             info!("MacroController: controlling location {:?}", new_loc);
             self.latest_owning_loc = new_loc;
+            if !self.owning_loc_history.contains(&new_loc) {
+                self.owning_loc_history.push(new_loc);
+                debug!("Owning location history: {:?}", self.owning_loc_history);
+            }
         }
     }
 
@@ -680,5 +687,36 @@ impl MacroController {
             })
             .collect();
         locations_under_attack
+    }
+
+    fn handle_destroyed_slots(&mut self, game_info: &GameInfo) {
+        if game_info.bot.destroyed_power_slot_ids.len() == 0
+            && game_info.bot.destroyed_token_slot_ids.len() == 0
+        {
+            return;
+        }
+
+        // check history of owned locations
+        let mut indices_to_delete: Vec<usize> = vec![];
+        for (i, loc) in self.owning_loc_history.iter().enumerate() {
+            let loc_owner = location::get_location_owner(&loc, game_info);
+            if !loc_owner.is_some_and(|id| id == game_info.bot.id) {
+                // location is not owned by me
+                debug!("Lost location {:?}", loc);
+                indices_to_delete.push(i);
+            }
+        }
+
+        for index in indices_to_delete {
+            if index == 0 {
+                // bot just lost his only location -> game over either way
+                continue;
+            }
+            if index == self.owning_loc_history.len() - 1 {
+                // lost the latest owning location -> need to update it
+                self.set_latest_owning_loc(self.owning_loc_history[index - 1]);
+            }
+            self.owning_loc_history.remove(index);
+        }
     }
 }
