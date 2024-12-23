@@ -20,6 +20,8 @@ const MIN_POWER_BUILD_WELL: f32 = 200.;
 const MIN_TEMPO_DIFF_ADVANTAGE: f32 = 0.;
 // radius in which a location is considered under attack by enemy units
 const DEFEND_LOCATION_AGGRO_RADIUS: f32 = 30.;
+// difference in number of squads to focus a well or orb instead of enemy squads
+const NUM_SQUADS_CRITICAL_MASS: i32 = 6;
 
 // locations to prioritize when ahead or even
 const LOCATION_PRIOS_AHEAD_SOUTH_START: [Location; 9] = [
@@ -94,6 +96,7 @@ pub struct MacroController {
     state: MacroState,
     attack_focus_loc: Location,
     latest_owning_loc: Location,
+    owning_loc_history: Vec<Location>,
     pub combat_controller: CombatController,
     pub spawn_controller: SpawnController,
 }
@@ -104,6 +107,7 @@ impl MacroController {
             state: MacroState::MatchStart,
             attack_focus_loc: Location::Center,
             latest_owning_loc: Location::Center,
+            owning_loc_history: vec![],
             combat_controller: CombatController::new(vec![]),
             spawn_controller: SpawnController::new(),
         }
@@ -117,6 +121,7 @@ impl MacroController {
 
         self.combat_controller
             .remove_dead_and_errored_squads(game_info);
+        self.handle_destroyed_slots(game_info);
         let current_pos = self
             .combat_controller
             .get_spawn_location(game_info, &self.latest_owning_loc);
@@ -363,7 +368,32 @@ impl MacroController {
             game_info.get_enemy_squads_in_range(&loc_pos, CONTROL_AREA_AGGRO_RADIUS);
         if enemy_squads_in_range.len() == 0 {
             // no more enemy squads in range -> take location
-            self.enter_state(MacroState::GroundPresenceNextLoc);
+            self.spawn_controller.stop_spawn();
+
+            if game_info.token_slot_diff() < 0 {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
+
+            if game_info.seconds_have_passed(180) && game_info.bot.token_slots.len() == 1 {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
+
+            if game_info.seconds_have_passed(420) && game_info.bot.token_slots.len() == 2 {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
+
+            if game_info.power_slot_diff() < 0
+                || game_info.bot.power > MIN_POWER_BUILD_WELL
+                || game_info.bot.squads.len() >= 3
+            {
+                // opponent has one or more wells, bot has enough power to defend an attack or has
+                // enough squads to defend a possible retaliation attack
+                self.enter_state(MacroState::TakeWell);
+                return;
+            }
             return;
         }
 
@@ -406,6 +436,7 @@ impl MacroController {
         self.spawn_controller.spawn_on_limit();
 
         let mut target: Option<EntityId> = None;
+        let mut pos: Option<Position2D> = None;
         let loc = game_info.locations.get(&self.attack_focus_loc).unwrap();
 
         // attack power slots first
@@ -416,6 +447,16 @@ impl MacroController {
                 .contains_key(&power_slot.entity_id.unwrap())
             {
                 target = power_slot.entity_id;
+                pos = Some(
+                    game_info
+                        .opponent
+                        .power_slots
+                        .get(&target.unwrap())
+                        .unwrap()
+                        .entity
+                        .position
+                        .to_2d(),
+                );
             }
         }
 
@@ -423,17 +464,34 @@ impl MacroController {
         if target.is_none() {
             if let Some(token) = loc.token {
                 target = token.entity_id;
+                pos = Some(
+                    game_info
+                        .opponent
+                        .token_slots
+                        .get(&target.unwrap())
+                        .unwrap()
+                        .entity
+                        .position
+                        .to_2d(),
+                );
             } else {
                 warn!("Can not find slot token to attack");
             }
         }
 
         if target.is_some() {
-            if game_info.bot.squads.len() >= 5 {
-                // 5 squads or more attacking -> focus the well/orb
+            let num_enemy_squads_in_range = game_info
+                .get_enemy_squads_in_range(&pos.unwrap(), CONTROL_AREA_AGGRO_RADIUS)
+                .len() as i32;
+
+            if (game_info.bot.squads.len() as i32) - num_enemy_squads_in_range
+                >= NUM_SQUADS_CRITICAL_MASS
+            {
+                // reached a critical mass of own squads -> focus the well or orb
                 self.combat_controller
                     .attack_slot_focus(&target.unwrap(), game_info);
             } else {
+                // focus enemy squads first
                 self.combat_controller
                     .attack_slot_control(&target.unwrap(), game_info);
             }
@@ -449,58 +507,61 @@ impl MacroController {
     fn run_defend(&mut self, game_info: &mut GameInfo) {
         self.spawn_controller.set_in_offense(false);
 
-        if game_info.token_slot_diff() < 0 {
-            // opponent is a tier ahead -> build next orb
-            self.enter_state(MacroState::AdvanceTier);
-            return;
-        }
+        let locations_under_attack = self.get_locations_under_attack(game_info);
 
-        if game_info.seconds_have_passed(180)
-            && game_info.bot.token_slots.len() == 1
-            && game_info.bot.power >= 200.
-        {
-            self.enter_state(MacroState::AdvanceTier);
-            return;
-        }
+        if locations_under_attack.len() == 0 {
+            // don't spawn any new units when the opponent is not attacking a location
+            self.spawn_controller.stop_spawn();
 
-        if game_info.seconds_have_passed(420)
-            && game_info.bot.token_slots.len() == 2
-            && game_info.bot.power >= 300.
-        {
-            self.enter_state(MacroState::AdvanceTier);
-            return;
-        }
+            if game_info.token_slot_diff() < 0 {
+                // opponent is a tier ahead -> build next orb
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
 
-        if game_info.power_slot_diff() < 0 {
-            // opponent has more power slots -> build another one
-            self.enter_state(MacroState::TakeWell);
-            return;
-        }
+            if game_info.seconds_have_passed(180)
+                && game_info.bot.token_slots.len() == 1
+                && game_info.bot.power >= 200.
+            {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
 
-        if MacroController::tempo_advantage(game_info) {
-            // tempo advantage -> move towards next location
-            self.enter_state(MacroState::GroundPresenceNextLoc);
-            return;
-        }
+            if game_info.seconds_have_passed(420)
+                && game_info.bot.token_slots.len() == 2
+                && game_info.bot.power >= 300.
+            {
+                self.enter_state(MacroState::AdvanceTier);
+                return;
+            }
 
-        if game_info.bot.power >= 300. {
-            // lots of unspent power -> build a well or attack
-            if game_info.bot.power_slots.len() < 7 {
+            if game_info.power_slot_diff() < 0 {
+                // opponent has more power slots -> build another one
                 self.enter_state(MacroState::TakeWell);
                 return;
             }
 
-            self.enter_state(MacroState::GroundPresenceNextLoc);
-        }
+            if MacroController::tempo_advantage(game_info) {
+                // tempo advantage -> move towards next location
+                self.enter_state(MacroState::GroundPresenceNextLoc);
+                return;
+            }
 
-        let locations_under_attack = self.get_locations_under_attack(game_info);
+            if game_info.bot.power >= 300. {
+                // lots of unspent power -> build a well or attack
+                if game_info.bot.power_slots.len() < 7 {
+                    self.enter_state(MacroState::TakeWell);
+                    return;
+                }
 
-        let loc_to_defend: Location;
-        if locations_under_attack.len() == 0 {
-            // don't spawn any new units when the opponent is not attacking a location
-            self.spawn_controller.stop_spawn();
+                self.enter_state(MacroState::GroundPresenceNextLoc);
+                return;
+            }
+
             return;
         }
+
+        let loc_to_defend: Location;
         if locations_under_attack.len() == 1 {
             loc_to_defend = *locations_under_attack.first().unwrap();
         } else {
@@ -622,6 +683,10 @@ impl MacroController {
         if new_loc != self.latest_owning_loc {
             info!("MacroController: controlling location {:?}", new_loc);
             self.latest_owning_loc = new_loc;
+            if !self.owning_loc_history.contains(&new_loc) {
+                self.owning_loc_history.push(new_loc);
+                debug!("Owning location history: {:?}", self.owning_loc_history);
+            }
         }
     }
 
@@ -654,5 +719,36 @@ impl MacroController {
             })
             .collect();
         locations_under_attack
+    }
+
+    fn handle_destroyed_slots(&mut self, game_info: &GameInfo) {
+        if game_info.bot.destroyed_power_slot_ids.len() == 0
+            && game_info.bot.destroyed_token_slot_ids.len() == 0
+        {
+            return;
+        }
+
+        // check history of owned locations
+        let mut indices_to_delete: Vec<usize> = vec![];
+        for (i, loc) in self.owning_loc_history.iter().enumerate() {
+            let loc_owner = location::get_location_owner(&loc, game_info);
+            if !loc_owner.is_some_and(|id| id == game_info.bot.id) {
+                // location is not owned by me
+                debug!("Lost location {:?}", loc);
+                indices_to_delete.push(i);
+            }
+        }
+
+        for index in indices_to_delete {
+            if index == 0 {
+                // bot just lost his only location -> game over either way
+                continue;
+            }
+            if index == self.owning_loc_history.len() - 1 {
+                // lost the latest owning location -> need to update it
+                self.set_latest_owning_loc(self.owning_loc_history[index - 1]);
+            }
+            self.owning_loc_history.remove(index);
+        }
     }
 }

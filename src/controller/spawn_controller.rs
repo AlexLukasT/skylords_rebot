@@ -264,6 +264,11 @@ impl SpawnController {
         };
 
         let opponent_squads: Vec<&Squad> = game_info.opponent.squads.values().collect();
+
+        if opponent_squads.len() == 0 {
+            return vec![BOT_CARDS[defender_indices[0]]];
+        }
+
         let squad_ids: Vec<u32> = opponent_squads
             .iter()
             .map(|&s| game_info.card_data.get_card_info_from_id(s.card_id.0).id)
@@ -293,7 +298,7 @@ impl SpawnController {
                 if attacker.defense_type.to_string() == defender.offense_type.to_string()
                     && !(!attacker.melee
                         && defender.melee
-                        && attacker.offense_type.to_string() == defender.offense_type.to_string())
+                        && attacker.offense_type.to_string() == defender.defense_type.to_string())
                 {
                     return vec![BOT_CARDS[*i]];
                 }

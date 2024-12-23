@@ -150,7 +150,7 @@ impl CardInfo {
             // Sunstriders also have an ability called "Siege", but it only adds a fixed
             // 1 damage to it's attack. We only care about Siege multipliers (like Firedancer),
             // so ignore this one.
-            return false;
+            return true;
         }
 
         for ability in card.get("abilities").unwrap().as_array().unwrap() {
@@ -164,10 +164,10 @@ impl CardInfo {
     }
 
     fn get_card_melee(card: &serde_json::Value) -> bool {
-        let attack_type = card.get("attackType").unwrap().as_str().unwrap();
+        let attack_type = card.get("attackType").unwrap().as_i64().unwrap();
         match attack_type {
-            "0" => return true,
-            "1" => return false,
+            0 => return true,
+            1 => return false,
             _ => {
                 let card_name = card.get("cardSlug").unwrap().as_str().unwrap();
                 error!("Unable to evaluate attack type {attack_type:?} for card {card_name:?}");
@@ -274,14 +274,10 @@ impl CardData {
     }
 
     pub fn load(&mut self) {
-        let root_dir = path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let full_path = root_dir.join(CARD_INFO_FILE_PATH);
-        debug!("Loading card data from {full_path:?}");
+        debug!("Loading card data");
 
-        let file = fs::File::open(full_path).expect("Unable to open cards.json file");
-        let json: serde_json::Value =
-            serde_json::from_reader(file).expect("Unable to parse cards.json file");
-        self.data = json;
+        self.data = serde_json::from_str(include_str!("../data/cards.json"))
+            .expect("Unable to parse cards.json file");
 
         debug!("Finished loading card data");
     }

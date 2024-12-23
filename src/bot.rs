@@ -9,7 +9,7 @@ use std::borrow::Cow;
 use crate::command_scheduler::CommandScheduler;
 use crate::controller::macro_controller::MacroController;
 
-// /AI: add SkylordsRebot Tutorial 4
+// /AI: add SkylordsRebot ShadowFrost 4
 const NAME: &'static str = "SkylordsRebot";
 
 pub struct SkylordsRebot {
