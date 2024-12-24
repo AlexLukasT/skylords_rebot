@@ -426,6 +426,13 @@ impl MacroController {
             return;
         }
 
+        if (game_info.bot.squads.len() as i64) - (game_info.opponent.squads.len() as i64) < -1 {
+            // opponent has 2 or more squads more than me -> fight is lost, retreat
+            self.spawn_controller.stop_spawn();
+            self.enter_state(MacroState::HealUnits);
+            return;
+        }
+
         self.spawn_controller.spawn_on_limit();
 
         let mut target: Option<EntityId> = None;
