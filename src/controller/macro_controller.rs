@@ -153,6 +153,11 @@ impl MacroController {
     }
 
     fn run_ground_presence_next_loc(&mut self, game_info: &GameInfo) {
+        if self.get_locations_under_attack(game_info).len() > 0 {
+            self.enter_state(MacroState::Defend);
+            return;
+        }
+
         if game_info.seconds_have_passed(180) && game_info.bot.token_slots.len() == 1 {
             self.enter_state(MacroState::AdvanceTier);
             return;
