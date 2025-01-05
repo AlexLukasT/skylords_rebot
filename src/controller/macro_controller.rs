@@ -19,7 +19,7 @@ const MIN_POWER_BUILD_WELL: f32 = 200.;
 // minimum difference in tempo to consider it an advantage
 const MIN_TEMPO_DIFF_ADVANTAGE: f32 = 0.;
 // radius in which a location is considered under attack by enemy units
-const DEFEND_LOCATION_AGGRO_RADIUS: f32 = 30.;
+const DEFEND_LOCATION_AGGRO_RADIUS: f32 = 50.;
 // difference in number of squads to focus a well or orb instead of enemy squads
 const NUM_SQUADS_CRITICAL_MASS: i32 = 6;
 
@@ -228,6 +228,11 @@ impl MacroController {
     }
 
     fn run_take_well(&mut self, command_scheduler: &mut CommandScheduler, game_info: &GameInfo) {
+        if self.get_locations_under_attack(game_info).len() > 0 {
+            self.enter_state(MacroState::Defend);
+            return;
+        }
+
         if command_scheduler.waiting_for_power_slot_to_finish() {
             // waiting for power slot to be built -> stay in this state
             return;
@@ -243,7 +248,7 @@ impl MacroController {
             let offense_slot_id =
                 location::get_next_free_power_slot(&self.attack_focus_loc, game_info);
 
-            if offense_slot_id.is_some() {
+            if offense_slot_id.is_some() && game_info.has_ground_presence(&self.attack_focus_loc) {
                 let command = Command::PowerSlotBuild {
                     slot_id: offense_slot_id.unwrap(),
                 };
@@ -269,6 +274,11 @@ impl MacroController {
     }
 
     fn run_advance_tier(&mut self, command_scheduler: &mut CommandScheduler, game_info: &GameInfo) {
+        if self.get_locations_under_attack(game_info).len() > 0 {
+            self.enter_state(MacroState::Defend);
+            return;
+        }
+
         if command_scheduler.waiting_for_token_slot_to_finish() {
             // waiting for token slot to be built -> stay in this state
             return;
@@ -565,6 +575,8 @@ impl MacroController {
 
             return;
         }
+
+        debug!("Locations under attack: {:?}", locations_under_attack);
 
         let loc_to_defend: Location;
         if locations_under_attack.len() == 1 {
