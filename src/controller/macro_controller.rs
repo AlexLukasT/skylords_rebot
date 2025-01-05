@@ -670,6 +670,11 @@ impl MacroController {
     fn repair_structures(game_info: &GameInfo, command_scheduler: &mut CommandScheduler) {
         // check power slots
         for power_slot in game_info.bot.power_slots.values() {
+            if power_slot.state != BuildState::Build {
+                // only repair fully built wells
+                continue;
+            }
+
             let entity_id = power_slot.entity.id;
             let (cur_hp, max_hp) = game_info.get_structure_health(&entity_id);
             if cur_hp < max_hp {
@@ -681,6 +686,11 @@ impl MacroController {
 
         // check token slots
         for token_slot in game_info.bot.token_slots.values() {
+            if token_slot.state != BuildState::Build {
+                // only repair fully built orbs
+                continue;
+            }
+
             let entity_id = token_slot.entity.id;
             let (cur_hp, max_hp) = game_info.get_structure_health(&entity_id);
             if cur_hp < max_hp {
