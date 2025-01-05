@@ -522,6 +522,32 @@ impl GameInfo {
         enemy_squads_in_range
     }
 
+    pub fn get_enemy_structures_in_range(
+        &self,
+        center: &Position2D,
+        radius: f32,
+    ) -> Vec<&EntityId> {
+        let mut enemy_structures_in_range: Vec<&EntityId> = vec![];
+
+        // power slots
+        for (entity_id, power_slot) in self.opponent.power_slots.iter() {
+            let dist = utils::dist(center, &power_slot.entity.position.to_2d());
+            if dist < radius {
+                enemy_structures_in_range.push(entity_id);
+            }
+        }
+
+        // token slots
+        for (entity_id, token_slot) in self.opponent.token_slots.iter() {
+            let dist = utils::dist(center, &token_slot.entity.position.to_2d());
+            if dist < radius {
+                enemy_structures_in_range.push(entity_id);
+            }
+        }
+
+        enemy_structures_in_range
+    }
+
     pub fn has_ground_presence(&self, location: &Location) -> bool {
         let loc_pos = self.locations.get(location).unwrap().position();
         for squad in self.bot.squads.values() {

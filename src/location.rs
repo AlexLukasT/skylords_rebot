@@ -157,6 +157,25 @@ pub fn get_next_free_token_slot(location: &Location, game_info: &GameInfo) -> Op
     None
 }
 
+pub fn get_location_from_entity_id(entity_id: &EntityId, game_info: &GameInfo) -> Option<Location> {
+    for (loc, loc_pos) in game_info.locations.iter() {
+        if let Some(token) = loc_pos.token {
+            if token.entity_id.is_some() && token.entity_id.unwrap() == *entity_id {
+                return Some(*loc);
+            }
+        }
+
+        for power in &loc_pos.powers {
+            if power.entity_id.is_some() && power.entity_id.unwrap() == *entity_id {
+                return Some(*loc);
+            }
+        }
+    }
+
+    warn!("Unable to find location for structure {:?}", entity_id);
+    None
+}
+
 pub fn get_location_positions() -> BTreeMap<Location, LocationPosition> {
     BTreeMap::from([
         (
