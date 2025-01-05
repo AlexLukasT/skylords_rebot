@@ -60,7 +60,7 @@ impl SpawnController {
 
         self.set_offense_spawn_policy(game_info);
 
-        let next_card = self.get_next_card(game_info);
+        let next_card = self.get_next_card(game_info, command_scheduler);
 
         let num_squads = game_info.bot.squads.keys().len();
 
@@ -213,32 +213,57 @@ impl SpawnController {
         self.in_offense = in_offense;
     }
 
-    fn get_next_card(&self, game_info: &mut GameInfo) -> CardTemplate {
+    fn get_tier1_card_policy(&self, game_info: &mut GameInfo) -> Option<Vec<CardTemplate>> {
+        if self.in_offense {
+            self.tier1_offense_spawn_policy.clone()
+        } else {
+            Some(self.get_defense_spawn_policy(game_info, Tier::Tier1))
+        }
+    }
+
+    fn get_tier2_card_policy(&self, game_info: &mut GameInfo) -> Option<Vec<CardTemplate>> {
+        if self.in_offense {
+            self.tier2_offense_spawn_policy.clone()
+        } else {
+            Some(self.get_defense_spawn_policy(game_info, Tier::Tier2))
+        }
+    }
+
+    fn get_tier3_card_policy(&self, game_info: &mut GameInfo) -> Option<Vec<CardTemplate>> {
+        if self.in_offense {
+            self.tier3_offense_spawn_policy.clone()
+        } else {
+            Some(self.get_defense_spawn_policy(game_info, Tier::Tier3))
+        }
+    }
+
+    fn get_next_card(
+        &self,
+        game_info: &mut GameInfo,
+        command_scheduler: &CommandScheduler,
+    ) -> CardTemplate {
         let card_policy: Option<Vec<CardTemplate>>;
 
-        if game_info.bot.token_slots.len() == 3 {
+        let num_token_slots = game_info.bot.token_slots.len();
+        if num_token_slots == 3 {
             // try T3 first
-            if self.in_offense {
-                // when in offense choose cards based on fixed policy
-                card_policy = self.tier3_offense_spawn_policy.clone();
+            if command_scheduler.waiting_for_token_slot_to_finish() {
+                // T3 orb still in progress -> fall back to T2
+                card_policy = self.get_tier2_card_policy(game_info);
             } else {
-                // when in defense choose cards based on enemy squads
-                card_policy = Some(self.get_defense_spawn_policy(game_info, Tier::Tier3));
+                card_policy = self.get_tier3_card_policy(game_info);
             }
-        } else if game_info.bot.token_slots.len() == 2 {
+        } else if num_token_slots == 2 {
             // T2
-            if self.in_offense {
-                card_policy = self.tier2_offense_spawn_policy.clone();
+            if command_scheduler.waiting_for_token_slot_to_finish() {
+                // T2 orb still in progress -> fall back to T1
+                card_policy = self.get_tier1_card_policy(game_info);
             } else {
-                card_policy = Some(self.get_defense_spawn_policy(game_info, Tier::Tier2));
+                card_policy = self.get_tier2_card_policy(game_info);
             }
         } else {
             // T1
-            if self.in_offense {
-                card_policy = self.tier1_offense_spawn_policy.clone();
-            } else {
-                card_policy = Some(self.get_defense_spawn_policy(game_info, Tier::Tier1));
-            }
+            card_policy = self.get_tier1_card_policy(game_info);
         }
 
         if card_policy.is_none() {

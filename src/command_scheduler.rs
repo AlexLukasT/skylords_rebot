@@ -11,7 +11,7 @@ pub struct CommandScheduler {
     tick_last_played_card: Option<Tick>,
     waiting_for_card_spawn: bool,
     waiting_for_power_slot: bool,
-    waiting_for_token_slot: bool,
+    token_slots_in_progress: Vec<EntityId>,
     current_power: f32,
     scheduled_commands: Vec<Command>,
     current_tick: Option<Tick>,
@@ -23,7 +23,7 @@ impl CommandScheduler {
             tick_last_played_card: None,
             waiting_for_card_spawn: false,
             waiting_for_power_slot: false,
-            waiting_for_token_slot: false,
+            token_slots_in_progress: vec![],
             current_power: 0.,
             scheduled_commands: vec![],
             current_tick: None,
@@ -53,6 +53,31 @@ impl CommandScheduler {
             warn!("More than 1 power slot was created at the same time");
         }
 
+        let mut indices_to_remove: Vec<usize> = vec![];
+        for (i, token_id) in self.token_slots_in_progress.iter().enumerate() {
+            if let Some(token_slot) = game_info.bot.token_slots.get(token_id) {
+                // orb was created
+                match token_slot.state {
+                    BuildState::Build => {
+                        // orb was fully built
+                        indices_to_remove.push(i);
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        // Sort indices in descending order to prevent issues with index shitfing
+        // after removing one element.
+        // Can use the unstable sort as there are no duplicate elements.
+        indices_to_remove.sort_unstable_by(|a, b| b.cmp(a));
+        for index in indices_to_remove {
+            // remove fully built orbs
+            let token_id = self.token_slots_in_progress[index];
+            debug!("Token slot {:?} finished building", token_id);
+            self.token_slots_in_progress.remove(index);
+        }
+
         self.current_power = game_info.bot.power;
         self.current_tick = game_info.current_tick;
     }
@@ -80,6 +105,13 @@ impl CommandScheduler {
             }
             Command::PowerSlotBuild { slot_id: _ } => {
                 self.waiting_for_power_slot = true;
+            }
+            Command::TokenSlotBuild {
+                slot_id: entity_id,
+                color: _,
+            } => {
+                self.token_slots_in_progress.push(entity_id);
+                debug!("Token slot {:?} started building", entity_id);
             }
             _ => {
                 //
@@ -132,7 +164,7 @@ impl CommandScheduler {
     }
 
     pub fn token_slot_can_be_built(&self, game_info: &GameInfo) -> bool {
-        if self.waiting_for_token_slot {
+        if self.token_slots_in_progress.len() > 0 {
             return false;
         }
 
@@ -151,6 +183,6 @@ impl CommandScheduler {
     }
 
     pub fn waiting_for_token_slot_to_finish(&self) -> bool {
-        self.waiting_for_token_slot
+        self.token_slots_in_progress.len() > 0
     }
 }

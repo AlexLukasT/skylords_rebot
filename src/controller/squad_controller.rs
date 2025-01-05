@@ -92,7 +92,11 @@ impl SquadController {
             self.commands.push(Command::GroupGoto {
                 squads: vec![self.entity_id],
                 positions: vec![new_dest],
-                walk_mode: WalkMode::Normal,
+                walk_mode: if force {
+                    WalkMode::Force
+                } else {
+                    WalkMode::Normal
+                },
                 orientation: 0.,
             });
             self.current_destination = Some(new_dest);
