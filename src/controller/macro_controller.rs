@@ -13,7 +13,7 @@ use crate::location::Location;
 use crate::utils;
 
 // radius around location to aggro on enemy squads
-const CONTROL_AREA_AGGRO_RADIUS: f32 = 80.;
+const CONTROL_AREA_AGGRO_RADIUS: f32 = 60.;
 // required power before a well is built
 const MIN_POWER_BUILD_WELL: f32 = 200.;
 // minimum difference in tempo to consider it an advantage
@@ -67,15 +67,15 @@ const LOCATION_PRIOS_BEHIND_SOUTH_START: [Location; 9] = [
 ];
 const LOCATION_PRIOS_BEHIND_NORTH_START: [Location; 9] = [
     Location::North,
-    // Location::Northwest,
+    Location::Northwest,
     Location::West,
-    Location::Northeast,
+    // Location::Northeast,
     Location::East,
     Location::Centernorth,
     Location::Center,
     Location::Centersouth,
-    // Location::Southeast,
-    Location::Southwest,
+    Location::Southeast,
+    // Location::Southwest,
     Location::South,
 ];
 
@@ -224,7 +224,7 @@ impl MacroController {
         }
 
         self.spawn_controller.spawn_single_unit();
-        self.combat_controller.move_squads(loc_pos);
+        self.combat_controller.move_squads(loc_pos, false);
     }
 
     fn run_take_well(&mut self, command_scheduler: &mut CommandScheduler, game_info: &GameInfo) {
@@ -339,7 +339,7 @@ impl MacroController {
             .get(&self.latest_owning_loc)
             .unwrap()
             .position();
-        self.combat_controller.move_squads(pos);
+        self.combat_controller.move_squads(pos, true);
 
         for squad_id in game_info.bot.squads.keys() {
             let (current_health, max_health) = game_info.get_squad_health(squad_id);
@@ -376,6 +376,15 @@ impl MacroController {
                 self.spawn_controller.stop_spawn();
                 self.enter_state(MacroState::Defend);
             }
+            return;
+        }
+
+        let enemy_squads_in_range =
+            game_info.get_enemy_squads_in_range(&current_pos, CONTROL_AREA_AGGRO_RADIUS);
+        if (game_info.bot.squads.len() as i64) - (enemy_squads_in_range.len() as i64) < -1 {
+            // opponent has 2 or more squads more than me -> fight is lost, retreat
+            self.spawn_controller.stop_spawn();
+            self.enter_state(MacroState::HealUnits);
             return;
         }
 
@@ -441,7 +450,12 @@ impl MacroController {
             return;
         }
 
-        if (game_info.bot.squads.len() as i64) - (game_info.opponent.squads.len() as i64) < -1 {
+        let current_pos = self
+            .combat_controller
+            .get_spawn_location(game_info, &self.latest_owning_loc);
+        let enemy_squads_in_range =
+            game_info.get_enemy_squads_in_range(&current_pos, CONTROL_AREA_AGGRO_RADIUS);
+        if (game_info.bot.squads.len() as i64) - (enemy_squads_in_range.len() as i64) < -1 {
             // opponent has 2 or more squads more than me -> fight is lost, retreat
             self.spawn_controller.stop_spawn();
             self.enter_state(MacroState::HealUnits);

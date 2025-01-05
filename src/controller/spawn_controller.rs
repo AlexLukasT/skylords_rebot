@@ -11,7 +11,7 @@ use crate::game_info::GameInfo;
 use crate::utils;
 
 // minimum difference in bound power to spawn a new squad when matching opponent's army size
-const MIN_POWER_DIFF_SPAWN: f32 = 50.;
+const MIN_POWER_DIFF_SPAWN: f32 = 30.;
 
 #[derive(PartialEq)]
 enum Tier {
@@ -58,7 +58,7 @@ impl SpawnController {
     ) -> Vec<SquadController> {
         // TODO: handle T2 + T3
 
-        self.set_spawn_policy(game_info);
+        self.set_offense_spawn_policy(game_info);
 
         let next_card = self.get_next_card(game_info);
 
@@ -147,7 +147,7 @@ impl SpawnController {
         self.state = new_state;
     }
 
-    fn set_spawn_policy(&mut self, game_info: &GameInfo) {
+    fn set_offense_spawn_policy(&mut self, game_info: &GameInfo) {
         let num_bot_token_slots = game_info.bot.token_slots.len();
         let num_opponent_token_slots = game_info.opponent.token_slots.len();
 
@@ -160,33 +160,33 @@ impl SpawnController {
                 return;
             }
 
-            info!("Setting T1 spawn policy to {orb_color:?}");
+            info!("Setting T1 offense spawn policy to {orb_color:?}");
             self.tier1_offense_spawn_policy =
                 Some(SpawnController::get_tier1_offense_spawn_policy(orb_color));
         }
 
-        if num_bot_token_slots == 2
-            && (self.tier2_offense_spawn_policy.is_none()
-                || game_info.opponent.new_token_slot_ids.len() > 0)
+        if (num_bot_token_slots == 2 && self.tier2_offense_spawn_policy.is_none())
+            || (num_opponent_token_slots == 2 && game_info.opponent.new_token_slot_ids.len() > 0)
         {
+            // either me or my opponent reached T2
             if num_opponent_token_slots == 2 {
                 let token_slots: Vec<&TokenSlot> =
                     game_info.opponent.token_slots.values().collect();
                 let orb_colors = (token_slots[0].color, token_slots[1].color);
-                info!("Setting T2 spawn policy to {orb_colors:?}");
+                info!("Setting T2 offense spawn policy to {orb_colors:?}");
                 self.tier2_offense_spawn_policy =
                     Some(SpawnController::get_tier2_offense_spawn_policy(orb_colors));
             } else {
-                info!("Setting T2 spawn policy to universal");
+                info!("Setting T2 offense spawn policy to universal");
                 self.tier2_offense_spawn_policy =
                     Some(SpawnController::get_tier2_univeral_spawn_policy());
             }
         }
 
-        if num_opponent_token_slots == 3
-            && (self.tier3_offense_spawn_policy.is_none()
-                || game_info.opponent.new_token_slot_ids.len() > 0)
+        if (num_bot_token_slots == 3 && self.tier3_offense_spawn_policy.is_none())
+            || (num_opponent_token_slots == 3 && game_info.opponent.new_token_slot_ids.len() > 0)
         {
+            // either me or my opponent reached T3
             if num_opponent_token_slots == 3 {
                 let token_slots: Vec<&TokenSlot> =
                     game_info.opponent.token_slots.values().collect();
@@ -195,11 +195,11 @@ impl SpawnController {
                     token_slots[1].color,
                     token_slots[2].color,
                 );
-                info!("Setting T3 spawn policy to {orb_colors:?}");
+                info!("Setting T3 offense spawn policy to {orb_colors:?}");
                 self.tier3_offense_spawn_policy =
                     Some(SpawnController::get_tier3_offense_spawn_policy(orb_colors));
             } else {
-                info!("Setting T3 spawn policy to universal");
+                info!("Setting T3 offense spawn policy to universal");
                 self.tier3_offense_spawn_policy =
                     Some(SpawnController::get_tier3_univeral_spawn_policy());
             }

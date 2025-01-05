@@ -70,7 +70,7 @@ impl SquadController {
             && self.state != SquadControllerState::SpawnCommandSent
     }
 
-    pub fn move_squad(&mut self, new_dest: Position2D) {
+    pub fn move_squad(&mut self, new_dest: Position2D, force: bool) {
         let new_destination_provided: bool;
         if let Some(cur_dest) = self.current_destination {
             if utils::dist(&cur_dest, &new_dest) < DEST_REACHED_MARGIN {

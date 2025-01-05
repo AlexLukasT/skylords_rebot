@@ -62,13 +62,13 @@ impl CombatController {
         }
     }
 
-    pub fn move_squads(&mut self, pos: Position2D) {
+    pub fn move_squads(&mut self, pos: Position2D, force: bool) {
         if self.state != CombatControllerState::Moving {
             self.enter_state(CombatControllerState::Moving);
         }
 
         for squad in &mut self.squads {
-            squad.move_squad(pos);
+            squad.move_squad(pos, force);
         }
     }
 
@@ -85,7 +85,7 @@ impl CombatController {
         if enemy_squads_in_range.len() == 0 {
             // no enemy in range -> stay close to the defending location
             for squad in &mut self.squads {
-                squad.move_squad(location_pos);
+                squad.move_squad(location_pos, false);
             }
         } else if enemy_squads_in_range.len() == 1 {
             // one enemy in range -> attack that one
@@ -120,7 +120,7 @@ impl CombatController {
         if utils::dist(own_pos, center) > radius {
             // outside of the area to control -> move there first
             for squad in &mut self.squads {
-                squad.move_squad(*center);
+                squad.move_squad(*center, false);
             }
             return;
         }
@@ -130,7 +130,7 @@ impl CombatController {
         if enemy_squads.len() == 0 {
             // no enemies in range -> move there
             for squad in &mut self.squads {
-                squad.move_squad(*center);
+                squad.move_squad(*center, false);
             }
             return;
         }
