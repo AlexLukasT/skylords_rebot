@@ -300,7 +300,7 @@ impl MacroController {
             let offense_slot_id =
                 location::get_next_free_token_slot(&self.attack_focus_loc, game_info);
 
-            if offense_slot_id.is_some() {
+            if offense_slot_id.is_some() && game_info.has_ground_presence(&self.attack_focus_loc) {
                 let command = Command::TokenSlotBuild {
                     slot_id: offense_slot_id.unwrap(),
                     color: BOT_ORBS[game_info.bot.token_slots.len()],
