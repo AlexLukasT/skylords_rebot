@@ -19,7 +19,7 @@ const MIN_POWER_BUILD_WELL: f32 = 200.;
 // minimum difference in tempo to consider it an advantage
 const MIN_TEMPO_DIFF_ADVANTAGE: f32 = 0.;
 // radius in which a location is considered under attack by enemy units
-const DEFEND_LOCATION_AGGRO_RADIUS: f32 = 50.;
+const DEFEND_LOCATION_AGGRO_RADIUS: f32 = 60.;
 // difference in number of squads to focus a well or orb instead of enemy squads
 const NUM_SQUADS_CRITICAL_MASS: i32 = 6;
 
@@ -158,16 +158,6 @@ impl MacroController {
             return;
         }
 
-        if game_info.seconds_have_passed(180) && game_info.bot.token_slots.len() == 1 {
-            self.enter_state(MacroState::AdvanceTier);
-            return;
-        }
-
-        if game_info.seconds_have_passed(420) && game_info.bot.token_slots.len() == 2 {
-            self.enter_state(MacroState::AdvanceTier);
-            return;
-        }
-
         self.spawn_controller.set_in_offense(true);
         self.set_attack_focus_loc(self.get_next_attack_focus_loc(game_info));
 
@@ -224,7 +214,7 @@ impl MacroController {
         }
 
         self.spawn_controller.spawn_single_unit();
-        self.combat_controller.move_squads(loc_pos, false);
+        self.combat_controller.move_squads(loc_pos, true);
     }
 
     fn run_take_well(&mut self, command_scheduler: &mut CommandScheduler, game_info: &GameInfo) {
